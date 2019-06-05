@@ -29,7 +29,7 @@ lg.setDefaultFilter("nearest", "nearest")
 nu.crawl("neko/lib", function(id, path)
     neko[id] = require(path)
 end)
-nc.apply()
+nc:apply()
 nv:resize(nc.video.width, nc.video.height)
 -- post-load operations
 local ns = neko.state.new()

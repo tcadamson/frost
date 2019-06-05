@@ -22,6 +22,14 @@ function util.tbl_out(t)
     end
 end
 
+function util.tbl_copy(t)
+    local out = {}
+    for k, v in pairs(t) do
+        out[k] = type(v) == "table" and util.tbl_copy(v) or v
+    end
+    return out
+end
+
 -- function util.tbl_join(to, ...)
 --     for i = 1, select("#", ...) do
 --         for k, v in pairs(select(i, ...)) do
