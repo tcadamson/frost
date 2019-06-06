@@ -13,16 +13,6 @@ local len = 6
 local shift = 87
 local max = 255
 
--- local function dec(hex)
---     local out = 0
---     for i = 1, #hex do
---         local char = sub(hex, i, i)
---         local test = (byte(char) - shift) * base ^ (#hex - i)
---         out = out + (test > 0 and test or char)
---     end
---     return out / max
--- end
-
 local rgb = nu.memoize(function(hex)
     local out = {}
     local a, b = find(hex, "^#%x+$")
@@ -35,7 +25,7 @@ local rgb = nu.memoize(function(hex)
                 local test = (byte(char) - shift)
                 dec = dec + (test > 0 and test or char) * (base ^ (#seg - j))
             end
-            out[#out + 1] = dec / max--dec(hex:sub(i, i + 1))
+            out[#out + 1] = dec / max
         end
         return out
     end
@@ -67,9 +57,5 @@ function video:pop()
     lg.setBlendMode("alpha", "premultiplied")
     lg.draw(self.canvas, 0, 0, 0, nc.video.scale, nc.video.scale)
 end
-
--- function color.set(hex)
---     lg.setColor(convert[hex])
--- end
 
 return video

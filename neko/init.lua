@@ -11,21 +11,8 @@ local function convert(controls)
     return controls
 end
 
+lg.setLineStyle("rough")
 lg.setDefaultFilter("nearest", "nearest")
-
--- cursor
--- local img = lg.newImage("res/cursor.png")
--- local canvas = lg.newCanvas(img:getDimensions() * 2)
--- canvas:renderTo(function()
---     lg.draw(img, 0, 0, 0, nc.video.scale, nc.video.scale)
--- end)
--- local data = canvas:newImageData()
--- data:mapPixel(function(x, y, r, g, b, a)
---     return r, g, b, (r + g + b > 0) and a or 0
--- end)
--- lm.setCursor(lm.newCursor(data))
--- cursor
-
 nu.crawl("neko/lib", function(id, path)
     neko[id] = require(path)
 end)
@@ -44,8 +31,6 @@ local ni = neko.input.new({
         }
     }
 })
--- nc:apply()
--- neko.config = nc
 neko.state = ns
 neko.input = ni
 nu.crawl("res/state", function(id, path)

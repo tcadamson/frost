@@ -8,14 +8,6 @@ local lf = love.filesystem
 local lw = love.window
 local util = {}
 
--- function util.tbl_keys(tbl)
---     local out = {}
---     for k in pairs(tbl) do
---         out[#out + 1] = k
---     end
---     return out
--- end
-
 function util.tbl_out(t)
     for k, v in pairs(t) do
         print(format("k: %s v: %s", k, v))
@@ -29,19 +21,6 @@ function util.tbl_copy(t)
     end
     return out
 end
-
--- function util.tbl_join(to, ...)
---     for i = 1, select("#", ...) do
---         for k, v in pairs(select(i, ...)) do
---             if util.type(k).number then
---                 to[#to + 1] = v
---             else
---                 to[k] = v
---             end
---         end
---     end
---     return to
--- end
 
 function util.type(item)
     return {[type(item)] = 1}
