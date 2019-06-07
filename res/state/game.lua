@@ -36,7 +36,7 @@ function game:enter()
         target = {e = self.player},
         tex = ne.tex[self.player]
     })
-    na:focus(self.mob)
+    na:focus(self.player)
 end
 
 function game:leave()

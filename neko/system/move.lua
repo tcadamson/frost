@@ -5,8 +5,8 @@ local move = {
     "control"
 }
 
-function move:update(dt)
-    self.pos.x, self.pos.y = (nv(self.pos) + self.phys.v * dt * nv(self.control)):unpack()
+function move:update(dt, pos, phys, control)
+    pos.x, pos.y = (nv(pos) + phys.v * dt * nv(control)):unpack()
 end
 
 return move

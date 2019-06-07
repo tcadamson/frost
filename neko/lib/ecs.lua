@@ -1,4 +1,5 @@
 local type = type
+local unpack = unpack
 local format = string.format
 local gmatch = string.gmatch
 local remove = table.remove
@@ -18,9 +19,10 @@ local uid = 0
 local fill = 1
 
 nu.crawl("neko/system", function(id, path)
-    sys[#sys + 1] = require(path)
+    sys[#sys + 1] = setmetatable(require(path), {
+        __index = ecs
+    })
 end)
-
 for k, v in pairs(com) do
     ffi.cdef(format([[
         typedef struct {
@@ -75,18 +77,19 @@ function ecs.update(dt)
     for i = 0, fill - 1 do
         for j = 1, #sys do
             local sys = sys[j]
+            local buf = {}
             local hole
             for k = 1, #sys do
                 local id = sys[k]
                 local struct = com[id][i]
                 if struct.status > 0 then
-                    sys[id] = struct
+                    buf[#buf + 1] = struct
                 else
                     hole = true
                     break
                 end
             end
-            if not hole then sys:update(dt) end
+            if not hole then sys:update(dt, unpack(buf)) end
         end
     end
 end

@@ -7,9 +7,9 @@ local ai = {
 }
 local radius = 35
 
-function ai:update(dt)
-    local delta = neko.ecs.pos[self.target.e] - nv(self.pos)
-    self.control.x, self.control.y = (delta:len() > radius and delta:norm() or nv()):unpack()
+function ai:update(dt, pos, phys, control, target)
+    local delta = self.pos[target.e] - nv(pos)
+    control.x, control.y = (delta:len() > radius and delta:norm() or nv()):unpack()
 end
 
 return ai
