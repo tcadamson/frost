@@ -5,6 +5,7 @@ local ne = neko.ecs
 local ni = neko.input
 local nc = neko.config
 local nv = neko.video
+local nm = neko.mouse
 local lw = love.window
 local lt = love.timer
 local le = love.event
@@ -21,6 +22,7 @@ function love.update(dt)
     nl.update(dt)
     ne.update(dt)
     ni:update()
+    nm:update()
     if ni:pressed("quit") then le.quit() end
 end
 

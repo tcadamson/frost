@@ -12,6 +12,7 @@ neko = setmetatable({
         controls = {
             quit = "q",
             act = "e",
+            focus = "lctrl",
             n = "w",
             e = "d",
             s = "s",
@@ -55,7 +56,7 @@ function love.conf(t)
     setmetatable(nc, {
         __index = {
             def = nu.tbl_copy(nc),
-            apply = function(t)
+            init = function(t)
                 local nr = neko.run
                 local lw = love.window
                 local fps = t.video.fps > 0 and t.video.fps

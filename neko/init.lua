@@ -1,8 +1,7 @@
 local nu = neko.util
 local nc = neko.config
 local nv = neko.video
-local lg = love.graphics
-local lm = love.mouse
+local nm = neko.mouse
 
 local function convert(controls)
     for k, v in pairs(controls) do
@@ -14,7 +13,8 @@ end
 nu.crawl("neko/lib", function(id, path)
     neko[id] = require(path)
 end)
-nc:apply()
+nc:init()
+nm:init()
 nv:resize(nc.video.width, nc.video.height)
 -- post-load operations
 local ns = neko.state.new()
