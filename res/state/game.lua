@@ -15,7 +15,7 @@ end
 
 function game:enter()
     self.player = ne.new({
-        "control",
+        "steer",
         pos = {
             x = 10,
             y = 200
@@ -30,7 +30,7 @@ function game:enter()
         }
     })
     self.mob = ne.new({
-        "control",
+        "steer",
         "pos",
         phys = {v = 50},
         target = {e = self.player},
@@ -43,10 +43,10 @@ function game:leave()
 end
 
 function game:update(dt)
-    local control = ne.control[self.player]
-    control.x, control.y = ni:get("move")
+    local steer = ne.steer[self.player]
+    steer.x, steer.y = ni:get("move")
     na:update(dt)
-    if ni:pressed("act") then ne.toggle(self.mob, "control") end
+    if ni:pressed("act") then ne.toggle(self.mob, "steer") end
 end
 
 function game:draw()

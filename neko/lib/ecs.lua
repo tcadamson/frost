@@ -11,7 +11,7 @@ local dead = {}
 local com = {
     pos = "double x, y",
     phys = "double v",
-    control = "double x, y",
+    steer = "double x, y",
     target = "uint16_t e",
     tex = "const char* file; uint16_t id, x, y, w, h"
 }
