@@ -1,11 +1,17 @@
 local ne = neko.ecs
 local ni = neko.input
-local nv = neko.vector
-local nc = neko.config
 local na = neko.camera
 local nd = neko.video
 local lg = love.graphics
 local game = {}
+
+local function field(x, y)
+    local r = 300
+    x = x or 0
+    y = y or 0
+    lg.setColor("#e7e7e7")
+    lg.polygon("fill", x - r, y, x, y - r, x + r, y, x, y + r)
+end
 
 function game:enter()
     self.player = ne.new({
@@ -14,15 +20,23 @@ function game:enter()
             x = 10,
             y = 200
         },
-        phys = {v = 100}
+        phys = {v = 100},
+        tex = {
+            file = "test",
+            x = 0,
+            y = 0,
+            w = 26,
+            h = 26
+        }
     })
     self.mob = ne.new({
         "control",
         "pos",
-        phys = {v = 25},
-        target = {e = self.player}
+        phys = {v = 50},
+        target = {e = self.player},
+        tex = ne.tex[self.player]
     })
-    na:focus(self.player)
+    na:focus(self.mob)
 end
 
 function game:leave()
@@ -36,20 +50,11 @@ function game:update(dt)
 end
 
 function game:draw()
-    local pos = ne.pos[self.player]
-    local mob = ne.pos[self.mob]
     nd:push()
     na:push()
-    lg.setColor("#ff0000")
-    lg.circle("line", mob.x, mob.y, 10)
-    lg.setColor("#d3d3d3")
-    for i = 1, 10 do
-        for j = 1, 10 do
-            lg.circle("line", i * 50 - 200, j * 50 - 100, 5)
-        end
-    end
-    lg.setColor("#4d4e4f")
-    lg.circle("line", pos.x, pos.y, 10)
+    field(0, 200)
+    lg.setColor()
+    lg.draw(nd.test)
     na:pop()
     nd:pop()
 end

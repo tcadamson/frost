@@ -11,8 +11,6 @@ local function convert(controls)
     return controls
 end
 
-lg.setLineStyle("rough")
-lg.setDefaultFilter("nearest", "nearest")
 nu.crawl("neko/lib", function(id, path)
     neko[id] = require(path)
 end)

@@ -40,8 +40,13 @@ for k, v in pairs(lg) do
     end or v
 end
 
+lg.setLineStyle("rough")
+lg.setDefaultFilter("nearest", "nearest")
+nu.crawl("res", function(id, path)
+    video[id] = lg.newSpriteBatch(lg.newImage(path))
+end, "png")
+
 function video:resize(w, h)
-    -- self.size = nv(w, h)
     self.canvas = lg.newCanvas(w, h)
 end
 

@@ -5,7 +5,7 @@ local ai = {
     "control",
     "target"
 }
-local radius = 100
+local radius = 35
 
 function ai:update(dt)
     local delta = neko.ecs.pos[self.target.e] - nv(self.pos)

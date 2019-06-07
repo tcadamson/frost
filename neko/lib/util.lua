@@ -26,13 +26,16 @@ function util.type(item)
     return {[type(item)] = 1}
 end
 
-function util.crawl(dir, call)
+function util.crawl(dir, call, filter)
+    filter = filter or ""
     for _, v in pairs(lf.getDirectoryItems(dir)) do
-        local path = format("%s/%s", dir, v)
-        if lf.getInfo(path, "file") then
-            call(match(path, "/(%a+)%."), gsub(path, ".lua", ""))
+        local short = format("%s/%s", dir, match(v, "[^.]+"))
+        local ext = match(v, "%.%a+$") or ""
+        local path = short .. ext
+        if lf.getInfo(path, "file") and match(ext, filter) then
+            call(match(short, "/(%a+)$"), ext == ".lua" and short or path)
         else
-            util.crawl(path, call)
+            util.crawl(short, call, filter)
         end
     end
 end

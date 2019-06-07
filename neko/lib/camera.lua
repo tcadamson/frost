@@ -8,7 +8,7 @@ local camera = {}
 function camera:focus(e)
     self.target = e
     self.pos = nv(ne.pos[e])
-    self.speed = 10
+    self.speed = 15
 end
 
 function camera:update(dt)
@@ -16,8 +16,7 @@ function camera:update(dt)
 end
 
 function camera:push()
-    local v = nc.video
-    local shift = nv(v.width, v.height) / (v.scale * 2)
+    local shift = nv(nc.video.width, nc.video.height) / (nc.video.scale * 2)
     lg.push()
     lg.translate((-self.pos + shift):unpack())
 end
