@@ -17,7 +17,7 @@ function draw:update(dt, pos, tex)
     local size = nv(tex.w, tex.h)
     if tex.id == 0 then
         local q = lg.newQuad(tex.x, tex.y, size.x, size.y, sheet:getTexture():getDimensions())
-        tex.id = nd.test:add(q, 0, 0)
+        tex.id = sheet:add(q, 0, 0)
     end
     sheet:set(tex.id, pos.x, pos.y, 0, 1, 1, (size / 2):unpack())
 end

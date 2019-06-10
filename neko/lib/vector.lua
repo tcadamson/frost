@@ -3,6 +3,7 @@ local sqrt = math.sqrt
 local sin = math.sin
 local cos = math.cos
 local atan2 = math.atan2
+local floor = math.floor
 local format = string.format
 local nu = neko.util
 local ffi = require("ffi")
@@ -71,9 +72,8 @@ function vec:unpack()
     return self.x, self.y
 end
 
-function vec:assign(x, y)
-    self.x = x
-    self.y = y
+function vec:floor()
+    return vec(floor(self.x), floor(self.y))
 end
 
 ffi.metatype("vec", meta)

@@ -13,7 +13,7 @@ function camera:focus(e)
 end
 
 function camera:update(dt)
-    local shift = nv(nc.video.width, nc.video.height) / (nc.video.scale * 2)
+    local shift = (nv(nc.video.width, nc.video.height) / (nc.video.scale * 2)):floor()
     self.pos = self.pos + (nv(ne.pos[self.target]) - self.pos) * self.speed * dt
     self.origin = self.pos - shift
 end

@@ -30,10 +30,10 @@ function util.crawl(dir, call, filter)
     filter = filter or ""
     for _, v in pairs(lf.getDirectoryItems(dir)) do
         local short = format("%s/%s", dir, match(v, "[^.]+"))
-        local ext = match(v, "%.%a+$") or ""
+        local ext = match(v, "%.%w+$") or ""
         local path = short .. ext
         if lf.getInfo(path, "file") and match(ext, filter) then
-            call(match(short, "/(%a+)$"), ext == ".lua" and short or path)
+            call(match(short, "/(%w+)$"), ext == ".lua" and short or path)
         else
             util.crawl(short, call, filter)
         end
