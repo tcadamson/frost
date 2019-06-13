@@ -8,7 +8,8 @@ local ai = {
 local radius = 35
 
 function ai:update(dt, pos, phys, steer, target)
-    local delta = self.pos[target.e] - nv(pos)
+    local ne = neko.ecs
+    local delta = ne.pos[target.e] - nv(pos)
     steer.x, steer.y = (delta:len() > radius and delta:norm() or nv()):unpack()
 end
 

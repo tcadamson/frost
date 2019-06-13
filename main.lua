@@ -6,9 +6,9 @@ local ni = neko.input
 local nc = neko.config
 local nv = neko.video
 local nm = neko.mouse
+local nx = neko.axis
 local lw = love.window
 local lt = love.timer
-local le = love.event
 
 function love.load()
     ns:hook()
@@ -19,11 +19,11 @@ end
 
 function love.update(dt)
     lw.setTitle("fps ~ " .. lt.getFPS())
+    nx.refresh()
     nl.update(dt)
     ne.update(dt)
     ni:update()
     nm:update()
-    if ni:pressed("quit") then le.quit() end
 end
 
 function love.resize(w, h)

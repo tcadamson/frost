@@ -43,7 +43,7 @@ end
 lg.setLineStyle("rough")
 lg.setDefaultFilter("nearest", "nearest")
 nu.crawl("res", function(id, path)
-    video[id] = lg.newSpriteBatch(lg.newImage(path))
+    video[id] = lg.newImage(path)
 end, "png")
 
 function video:resize(w, h)

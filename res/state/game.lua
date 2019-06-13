@@ -1,11 +1,15 @@
 local floor = math.floor
+local sin = math.sin
 local ne = neko.ecs
 local ni = neko.input
 local na = neko.camera
 local nd = neko.video
 local nv = neko.vector
 local nm = neko.mouse
+local nr = neko.run
+local nx = neko.axis
 local lg = love.graphics
+local le = love.event
 local game = {}
 
 local function field(x, y)
@@ -14,6 +18,7 @@ local function field(x, y)
     y = y or 0
     lg.setColor("#dfdfdf")
     lg.polygon("fill", x - r, y, x, y - r, x + r, y, x, y + r)
+    lg.setColor()
 end
 
 function game:enter()
@@ -46,6 +51,7 @@ function game:update(dt)
     local steer = ne.steer[self.player]
     steer.x, steer.y = ni:get("move")
     if ni:pressed("act") then ne.toggle(self.mob, "steer") end
+    if ni:pressed("quit") then le.quit() end
     na:update(dt)
 end
 
@@ -53,8 +59,7 @@ function game:draw()
     nd:push()
     na:push()
     field(0, 200)
-    lg.setColor()
-    lg.draw(nd.test)
+    nx.draw()
     if ni:down("focus") then
         local mob = nv(ne.pos[self.mob])
         local delta = mob - nm.pos

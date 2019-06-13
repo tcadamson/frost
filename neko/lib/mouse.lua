@@ -7,7 +7,7 @@ local lm = love.mouse
 local mouse = {}
 
 function mouse:init()
-    local img = nd.cursor:getTexture()
+    local img = nd.cursor
     local canvas = lg.newCanvas(img:getDimensions() * nc.video.scale)
     canvas:renderTo(function()
         lg.draw(img, 0, 0, 0, nc.video.scale, nc.video.scale)
