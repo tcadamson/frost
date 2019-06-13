@@ -1,5 +1,4 @@
 local floor = math.floor
-local sin = math.sin
 local ne = neko.ecs
 local ni = neko.input
 local na = neko.camera
