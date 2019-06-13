@@ -19,9 +19,9 @@ nu.crawl("neko/system", function(id, path)
     sys.buf = {}
     ne[#ne + 1] = sys
 end)
-nc:init()
-nm:init()
-nv:resize(nc.video.width, nc.video.height)
+nc.init()
+nm.init()
+nv.resize(nc.video.width, nc.video.height)
 -- post-load operations
 local ns = neko.state.new()
 local ni = neko.input.new({

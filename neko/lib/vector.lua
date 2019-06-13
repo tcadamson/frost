@@ -17,6 +17,7 @@ local meta = {
     __sub = function(a, b) return vec(a.x - b.x, a.y - b.y) end,
     __div = function(a, b) return vec(a.x / b, a.y / b) end,
     __eq = function(a, b) return a.x == b.x and a.y == b.y end,
+    __lt = function(a, b) return a.x < b and a.y < b end,
     __mul = function(a, b)
         if type(a) == "number" then return vec(b.x * a, b.y * a) end
         if type(b) == "cdata" then

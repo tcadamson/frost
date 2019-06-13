@@ -1,12 +1,11 @@
 local nc = neko.config
 local nv = neko.vector
 local nd = neko.video
-local na = neko.camera
 local lg = love.graphics
 local lm = love.mouse
 local mouse = {}
 
-function mouse:init()
+function mouse.init()
     local img = nd.cursor
     local canvas = lg.newCanvas(img:getDimensions() * nc.video.scale)
     canvas:renderTo(function()
@@ -16,7 +15,7 @@ function mouse:init()
 end
 
 function mouse:update()
-    self.pos = (nv(lm.getPosition()) / nc.video.scale) + (na.origin or nv())
+    self.pos = (nv(lm.getPosition()) / nc.video.scale)
 end
 
 return mouse

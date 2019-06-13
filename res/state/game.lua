@@ -57,7 +57,7 @@ function game:enter()
         target = {e = self.player},
         tex = ne.tex[self.player]
     })
-    na:focus(self.player)
+    na.focus(self.player)
 end
 
 function game:update(dt)
@@ -73,12 +73,12 @@ function game:update(dt)
     end
     if ni:pressed("act") then ne.toggle(self.mob, "steer") end
     if ni:pressed("quit") then le.quit() end
-    na:update(dt)
+    na.update(dt)
 end
 
 function game:draw()
-    nd:push()
-    na:push()
+    nd.push()
+    na.push()
     field(0, 200)
     nx.draw()
     if ni:down("focus") then
@@ -90,8 +90,8 @@ function game:draw()
             lg.circle("fill", pos.x, pos.y, 2)
         end
     end
-    na:pop()
-    nd:pop()
+    na.pop()
+    nd.pop()
 end
 
 return game

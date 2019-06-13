@@ -56,19 +56,19 @@ function love.conf(t)
     setmetatable(nc, {
         __index = {
             def = nu.tbl_copy(nc),
-            init = function(t)
+            init = function()
                 local nr = neko.run
                 local lw = love.window
-                local fps = t.video.fps > 0 and t.video.fps
+                local fps = nc.video.fps > 0 and nc.video.fps
                 local flags = sync(lw.getMode())
-                if flags then lw.setMode(t.video.width, t.video.height, flags) end
+                if flags then lw.setMode(nc.video.width, nc.video.height, flags) end
                 -- apply relevant config settings to libs
                 nr.framerate = fps
-                nr.rate = 1 / (fps or t.def.video.fps)
+                nr.rate = 1 / (fps or nc.def.video.fps)
             end,
-            save = function(t)
+            save = function()
                 local out = ""
-                for id, section in pairs(t) do
+                for id, section in pairs(nc) do
                     out = gsub(out .. format("[%s]\n", id), "\n%[", "\n%1")
                     for k, v in pairs(section) do
                         out = out .. format("%s=%s\n", k, v)

@@ -4,7 +4,8 @@ local find = string.find
 local nu = neko.util
 local nc = neko.config
 local lg = love.graphics
-local video = {
+local video = {}
+local color = {
     black = "#000000",
     white = "#ffffff"
 }
@@ -12,6 +13,7 @@ local base = 16
 local len = 6
 local shift = 87
 local max = 255
+local canvas
 
 local rgb = nu.memoize(function(hex)
     local out = {}
@@ -35,32 +37,31 @@ for k, v in pairs(lg) do
     -- TODO: more sophisticated heuristic
     local test = k == "clear" or k == "setColor"
     lg[k] = test and function(hex)
-        hex = hex or video.white
+        hex = hex or color.white
         v(rgb[hex])
     end or v
 end
-
 lg.setLineStyle("rough")
 lg.setDefaultFilter("nearest", "nearest")
 nu.crawl("res", function(id, path)
     video[id] = lg.newImage(path)
 end, "png")
 
-function video:resize(w, h)
-    self.canvas = lg.newCanvas(w, h)
+function video.resize(w, h)
+    canvas = lg.newCanvas(w, h)
 end
 
-function video:push()
-    lg.setCanvas(self.canvas)
-    lg.clear(self.clear)
+function video.push()
+    lg.setCanvas(canvas)
+    lg.clear()
     lg.setBlendMode("alpha")
 end
 
-function video:pop()
+function video.pop()
     lg.setCanvas()
     lg.setColor()
     lg.setBlendMode("alpha", "premultiplied")
-    lg.draw(self.canvas, 0, 0, 0, nc.video.scale, nc.video.scale)
+    lg.draw(canvas, 0, 0, 0, nc.video.scale, nc.video.scale)
 end
 
 return video

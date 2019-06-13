@@ -29,5 +29,5 @@ end
 function love.resize(w, h)
     nc.video.width = w
     nc.video.height = h
-    nv:resize(w, h)
+    nv.resize(w, h)
 end
