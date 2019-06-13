@@ -2,6 +2,7 @@ local nu = neko.util
 local nc = neko.config
 local nv = neko.video
 local nm = neko.mouse
+local ne = neko.ecs
 
 local function convert(controls)
     for k, v in pairs(controls) do
@@ -12,6 +13,11 @@ end
 
 nu.crawl("neko/lib", function(id, path)
     neko[id] = require(path)
+end)
+nu.crawl("neko/system", function(id, path)
+    local sys = require(path)
+    sys.buf = {}
+    ne[#ne + 1] = sys
 end)
 nc:init()
 nm:init()

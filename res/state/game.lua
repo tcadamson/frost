@@ -1,4 +1,5 @@
 local floor = math.floor
+local sin = math.sin
 local ne = neko.ecs
 local ni = neko.input
 local na = neko.camera
@@ -21,6 +22,19 @@ local function field(x, y)
 end
 
 function game:enter()
+    self.test = 199
+    for i = 0, self.test do
+        ne.new({
+            "pos",
+            tex = {
+                file = "cursor",
+                x = 0,
+                y = 0,
+                w = 27,
+                h = 27
+            }
+        })
+    end
     self.player = ne.new({
         "steer",
         pos = {
@@ -49,6 +63,14 @@ end
 function game:update(dt)
     local steer = ne.steer[self.player]
     steer.x, steer.y = ni:get("move")
+    for i = 0, self.test do
+        local j = i + 1
+        local scale = 10
+        local speed = 0.05
+        local shift = 100
+        ne.pos[i].x = j * scale
+        ne.pos[i].y = sin(nr.tick * speed - j) * scale + shift
+    end
     if ni:pressed("act") then ne.toggle(self.mob, "steer") end
     if ni:pressed("quit") then le.quit() end
     na:update(dt)

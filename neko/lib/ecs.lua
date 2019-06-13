@@ -1,27 +1,21 @@
 local type = type
 local unpack = unpack
 local format = string.format
-local gmatch = string.gmatch
 local remove = table.remove
 local nu = neko.util
 local ffi = require("ffi")
 local ecs = {}
-local sys = {}
 local dead = {}
 local com = {
     pos = "double x, y",
     phys = "double v",
     steer = "double x, y",
     target = "uint16_t e",
-    tex = "const char* file; uint16_t id, x, y, w, h"
+    tex = "const char* file; uint16_t x, y, w, h"
 }
 local uid = 0
 local fill = 1
 
-nu.crawl("neko/system", function(id, path)
-    sys[#sys + 1] = require(path)
-    sys[#sys].buf = {}
-end)
 for k, v in pairs(com) do
     ffi.cdef(format([[
         typedef struct {
@@ -74,8 +68,8 @@ end
 
 function ecs.update(dt)
     for i = 0, fill - 1 do
-        for j = 1, #sys do
-            local sys = sys[j]
+        for j = 1, #ecs do
+            local sys = ecs[j]
             local buf = sys.buf
             local hole
             for k = 1, #sys do
