@@ -21,7 +21,7 @@ for k, v in pairs(com) do
         typedef struct {
             %s;
             uint8_t status;
-        } %s;
+        } %s
     ]], v, k))
     com[k] = ffi.new(k .. "[?]", fill)
     ecs[k] = setmetatable({}, {

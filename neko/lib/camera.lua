@@ -17,7 +17,7 @@ function camera.focus(e)
 end
 
 function camera.culled(pos, shift)
-    local net = nv(pos.x, pos.y) - nv(shift.x, shift.y)
+    local net = nv(pos) - nv(shift)
     return (net + origin) < 0 or (size - net) < 0
 end
 

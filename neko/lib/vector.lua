@@ -6,10 +6,14 @@ local atan2 = math.atan2
 local floor = math.floor
 local format = string.format
 local nu = neko.util
+local nm = neko.mem
 local ffi = require("ffi")
 local vec = {}
-
-ffi.cdef("typedef struct { double x, y; } vec;")
+local buf = nm.new([[
+    typedef struct {
+        double x, y;
+    } vec
+]], true)
 
 local meta = {
     __unm = function(a) return vec(-a.x, -a.y) end,
@@ -29,13 +33,15 @@ local meta = {
     __index = vec,
     __tostring = function(v) return format("(%.3f, %.3f)", v.x, v.y) end,
     __call = function(t, x, y)
+        local vec = buf:get()
         x = x or 0
         y = y or 0
         if type(x) == "cdata" then
             y = x.y
             x = x.x
         end
-        return ffi.new("vec", x, y)
+        vec.x, vec.y = x, y
+        return vec
     end
 }
 
@@ -60,13 +66,6 @@ end
 
 function vec:copy()
     return vec(self.x, self.y)
-end
-
-function vec:table()
-    return {
-        x = self.x,
-        y = self.y
-    }
 end
 
 function vec:unpack()

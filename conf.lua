@@ -22,7 +22,9 @@ neko = setmetatable({
 }, {
     -- access some libs before they're all loaded, e.g. util, vector
     __index = function(t, k)
-        return require("neko/lib/" .. k)
+        local status, out = pcall(function() return require("neko/lib/" .. k) end)
+        t[k] = status and out or require("neko/lib/import/" .. k)
+        return t[k]
     end
 })
 local tonumber = tonumber
