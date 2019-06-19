@@ -6,25 +6,25 @@ local nm = neko.mouse
 local lg = love.graphics
 local camera = {}
 local pos = nv()
-local size = nv()
-local origin = nv()
-local speed = 15
+local v = 15
+local area
+local origin
 local target
 
 function camera.focus(e)
     target = e
-    pos = nv(ne.pos[e])
+    pos:set(nv(ne.pos[e]))
 end
 
 function camera.culled(pos, shift)
     local net = nv(pos) - nv(shift)
-    return (net + origin) < 0 or (size - net) < 0
+    return (net + origin) < 0 or (area - net) < 0
 end
 
 function camera.update(dt)
-    if target then pos = pos + (nv(ne.pos[target]) - pos) * speed * dt end
-    size = nv(nc.video.width, nc.video.height) / nc.video.scale
-    origin = pos - (size / 2):floor()
+    if target then pos:set(pos + (nv(ne.pos[target]) - pos) * v * dt) end
+    area = nv(nc.video.width, nc.video.height) / nc.video.scale
+    origin = pos - (area / 2):floor()
     nm.pos = nm.pos + origin
 end
 

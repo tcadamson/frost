@@ -3,6 +3,7 @@ local unpack = unpack
 local format = string.format
 local remove = table.remove
 local nu = neko.util
+local nm = neko.mem
 local ffi = require("ffi")
 local ecs = {}
 local dead = {}
@@ -14,21 +15,19 @@ local com = {
     tex = "const char* file; uint16_t x, y, w, h"
 }
 local uid = 0
-local fill = 1
 
 for k, v in pairs(com) do
-    ffi.cdef(format([[
+    com[k] = nm.new(format([[
         typedef struct {
             %s;
             uint8_t status;
         } %s
     ]], v, k))
-    com[k] = ffi.new(k .. "[?]", fill)
     ecs[k] = setmetatable({}, {
-        __index = function(t, uid) return com[k][uid] end,
-        __newindex = function(t, uid, v)
+        __index = function(t, e) return com[k]:get(e) end,
+        __newindex = function(t, e, v)
             v.status = 1
-            com[k][uid] = v
+            com[k]:set(e, v)
         end
     })
 end
@@ -36,14 +35,6 @@ end
 function ecs.new(data)
     local e = uid
     uid = remove(dead) or uid + 1
-    if uid > fill then
-        fill = fill * 2
-        for k, v in pairs(com) do
-            local buf = ffi.new(k .. "[?]", fill)
-            ffi.copy(buf, v, ffi.sizeof(v))
-            com[k] = buf
-        end
-    end
     for k, v in pairs(data) do
         if type(k) == "number" then
             k = v
@@ -56,27 +47,27 @@ end
 
 function ecs.kill(e)
     for k, v in pairs(com) do
-        com[k][e] = {}
+        com[k]:set(e, {})
     end
     dead[#dead + 1] = e
 end
 
 function ecs.toggle(e, id)
-    local struct = com[id][e]
+    local struct = com[id]:get(e)
     struct.status = struct.status > 0 and 0 or 1
 end
 
 function ecs.update(dt)
-    for i = 0, fill - 1 do
-        for j = 1, #ecs do
-            local sys = ecs[j]
+    for e = 0, uid do
+        for i = 1, #ecs do
+            local sys = ecs[i]
             local buf = sys.buf
             local hole
-            for k = 1, #sys do
-                local id = sys[k]
-                local struct = com[id][i]
+            for j = 1, #sys do
+                local id = sys[j]
+                local struct = com[id]:get(e)
                 if struct.status > 0 then
-                    buf[k] = struct
+                    buf[j] = struct
                 else
                     hole = true
                     break
