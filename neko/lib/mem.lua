@@ -1,7 +1,7 @@
 local match = string.match
 local floor = math.floor
-local huge = math.huge
 local nr = neko.run
+local lw = love.window
 local ffi = require("ffi")
 local mem = {}
 local bufs = {}
@@ -15,14 +15,13 @@ local function access(blocks, uid, struct)
     return blocks[i][j]
 end
 
-function mem.new(cdef, weak)
+function mem.new(cdef)
     local id = match(cdef, "(%w+)%s-$")
     local ref = setmetatable({
         blocks = {},
-        weak = weak,
         id = id,
         uid = 0,
-        min = 0
+        reserved = 0
     }, {
         __index = mem
     })
@@ -39,23 +38,25 @@ function mem.new(cdef, weak)
     return ref
 end
 
-function mem:get(uid)
-    return access(self.blocks, uid)
-end
-
-function mem:set(uid, struct)
-    access(self.blocks, uid, struct)
-end
-
-function mem:fetch()
-    if self.weak and nr.tick > tick then
-        -- # of allocations at file level (min) are reserved
-        self.uid = self.min
+function mem:add()
+    if lw.getTitle() == "Untitled" then self.reserved = self.reserved + 1 end
+    if nr.tick > tick then
+        -- file-level allocations are reserved
+        -- these structs should be modified directly (e.g. vec:set(...))
+        self.uid = self.reserved
         tick = nr.tick
     end
     local uid = self.uid
     self.uid = self.uid + 1
-    return self:get(uid)
+    return access(self.blocks, uid)
+end
+
+function mem:get(uid)
+    return access(self.blocks, uid)
+end
+
+function mem:set(uid, init)
+    access(self.blocks, uid, init)
 end
 
 return mem

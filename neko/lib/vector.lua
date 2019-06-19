@@ -7,14 +7,13 @@ local floor = math.floor
 local format = string.format
 local nu = neko.util
 local nm = neko.mem
-local nr = neko.run
 local ffi = require("ffi")
 local vec = {}
 local buf = nm.new([[
     typedef struct {
         double x, y;
     } vec
-]], true)
+]])
 
 local meta = {
     __unm = function(a) return vec(-a.x, -a.y) end,
@@ -34,8 +33,7 @@ local meta = {
     __index = vec,
     __tostring = function(v) return format("(%.3f, %.3f)", v.x, v.y) end,
     __call = function(t, x, y)
-        local vec = buf:fetch()
-        if nr.tick == 1 then buf.min = buf.min + 1 end
+        local vec = buf:add()
         x = x or 0
         y = y or 0
         if type(x) == "cdata" then
@@ -78,7 +76,6 @@ function vec:floor()
     return vec(floor(self.x), floor(self.y))
 end
 
--- allocations at file level should be modified directly
 function vec:set(v)
     self.x, self.y = v.x, v.y
 end
