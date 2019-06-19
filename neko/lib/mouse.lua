@@ -1,6 +1,7 @@
 local nc = neko.config
 local nv = neko.vector
 local nd = neko.video
+local na = neko.camera
 local lg = love.graphics
 local lm = love.mouse
 local mouse = {}
@@ -14,8 +15,8 @@ function mouse.init()
     lm.setCursor(lm.newCursor(canvas:newImageData()))
 end
 
-function mouse:update()
-    self.pos = (nv(lm.getPosition()) / nc.video.scale)
+function mouse.pos()
+    return nv(lm.getPosition()) / nc.video.scale + na.origin()
 end
 
 return mouse

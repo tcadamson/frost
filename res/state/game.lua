@@ -78,19 +78,20 @@ end
 
 function game:draw()
     nd.push()
-    na.push()
+    lg.push()
+    lg.translate((-na.origin()):unpack())
     field(0, 200)
     nx.draw()
     if ni:down("focus") then
         local mob = nv(ne.pos[self.mob])
-        local delta = mob - nm.pos
+        local delta = mob - nm.pos()
         local step = 10
         for i = 0, floor(delta:len() / step) do
-            local pos = nm.pos + delta:norm() * i * step
+            local pos = nm.pos() + delta:norm() * i * step
             lg.circle("fill", pos.x, pos.y, 2)
         end
     end
-    na.pop()
+    lg.pop()
     nd.pop()
 end
 

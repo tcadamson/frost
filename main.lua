@@ -3,9 +3,7 @@ local ns = neko.state
 local nl = neko.lerp
 local ne = neko.ecs
 local ni = neko.input
-local nc = neko.config
 local nv = neko.video
-local nm = neko.mouse
 local nx = neko.axis
 local lw = love.window
 local lt = love.timer
@@ -23,11 +21,8 @@ function love.update(dt)
     nl.update(dt)
     ne.update(dt)
     ni:update()
-    nm:update()
 end
 
 function love.resize(w, h)
-    nc.video.width = w
-    nc.video.height = h
     nv.resize(w, h)
 end

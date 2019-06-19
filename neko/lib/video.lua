@@ -3,6 +3,7 @@ local byte = string.byte
 local find = string.find
 local nu = neko.util
 local nc = neko.config
+local nv = neko.vector
 local lg = love.graphics
 local video = {}
 local color = {
@@ -48,7 +49,13 @@ nu.crawl("res", function(id, path)
 end, "png")
 
 function video.resize(w, h)
+    nc.video.width = w
+    nc.video.height = h
     canvas = lg.newCanvas(w, h)
+end
+
+function video.area()
+    return nv(nc.video.width, nc.video.height) / nc.video.scale
 end
 
 function video.push()
