@@ -8,6 +8,13 @@ local bufs = {}
 local block = 256
 local tick = 1
 
+local function access(blocks, uid, struct)
+    local i = floor(uid / block) + 1
+    local j = uid % block
+    if struct then blocks[i][j] = struct end
+    return blocks[i][j]
+end
+
 function mem.new(cdef, weak)
     local id = match(cdef, "(%w+)%s-$")
     local ref = setmetatable({
@@ -20,12 +27,11 @@ function mem.new(cdef, weak)
         __index = mem
     })
     setmetatable(ref.blocks, {
-        __index = function(t, uid)
-            uid = floor(uid / block) + 1
-            while uid > #t do
+        __index = function(t, k)
+            while k > #t do
                 t[#t + 1] = ffi.new(ref.id .. "[?]", block)
             end
-            return t[uid]
+            return t[k]
         end
     })
     ffi.cdef(cdef)
@@ -34,11 +40,11 @@ function mem.new(cdef, weak)
 end
 
 function mem:get(uid)
-    return self.blocks[uid][uid % block]
+    return access(self.blocks, uid)
 end
 
 function mem:set(uid, struct)
-    self.blocks[uid][uid % block] = struct
+    access(self.blocks, uid, struct)
 end
 
 function mem:fetch()
