@@ -1,3 +1,5 @@
+local nr = neko.run
+nr.tick = 0
 local nu = neko.util
 local nc = neko.config
 local nv = neko.video
@@ -11,9 +13,6 @@ local function convert(controls)
     return controls
 end
 
-nu.crawl("neko/lib", function(id, path)
-    neko[id] = require(path)
-end)
 nu.crawl("neko/system", function(id, path)
     local sys = require(path)
     sys.buf = {}
@@ -35,12 +34,12 @@ local ni = neko.input.new({
         }
     }
 })
+local switch = ns.switch
+ns.switch = function(ns, id)
+    switch(ns, ns[id])
+end
 neko.state = ns
 neko.input = ni
 nu.crawl("res/state", function(id, path)
     ns[id] = require(path)
 end)
-local switch = ns.switch
-function ns:switch(id)
-    switch(self, self[id])
-end

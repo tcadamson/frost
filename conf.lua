@@ -96,7 +96,7 @@ function love.conf(t)
             end
         end
     else
-        nc:save()
+        nc.save()
     end
     local w = sync(t.window)
     w.resizable = true

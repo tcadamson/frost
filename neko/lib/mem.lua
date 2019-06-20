@@ -1,7 +1,6 @@
 local match = string.match
 local floor = math.floor
 local nr = neko.run
-local lw = love.window
 local ffi = require("ffi")
 local mem = {}
 local bufs = {}
@@ -39,7 +38,7 @@ function mem.new(cdef)
 end
 
 function mem:add()
-    if lw.getTitle() == "Untitled" then self.reserved = self.reserved + 1 end
+    if not nr.loaded then self.reserved = self.reserved + 1 end
     if nr.tick > tick then
         -- file-level allocations are reserved
         -- these structs should be modified directly (e.g. vec:set(...))
