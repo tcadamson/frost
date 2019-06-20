@@ -7,17 +7,17 @@ local v = 15
 local target
 
 function camera.focus(e)
+    if not target then pos:set(nv(ne.pos[e])) end
     target = e
-    pos:set(nv(ne.pos[e]))
 end
 
 function camera.culled(pos, shift)
     local net = nv(pos) - nv(shift)
-    return (net + origin) < 0 or (nd.area() - net) < 0
+    return (net + camera.origin()) < 0 or (nd.area() - net) < 0
 end
 
 function camera.update(dt)
-    if target then pos:set(pos + (nv(ne.pos[target]) - pos) * v * dt) end
+    pos:set(pos + (nv(ne.pos[target]) - pos) * v * dt)
 end
 
 function camera.origin()

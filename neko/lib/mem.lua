@@ -7,11 +7,13 @@ local bufs = {}
 local block = 256
 local tick = 1
 
-local function access(blocks, uid, struct)
-    local i = floor(uid / block) + 1
-    local j = uid % block
-    if struct then blocks[i][j] = struct end
-    return blocks[i][j]
+local function access(blocks, uid, init)
+    if uid then
+        local i = floor(uid / block) + 1
+        local j = uid % block
+        if init then blocks[i][j] = init end
+        return blocks[i][j]
+    end
 end
 
 function mem.new(cdef)
