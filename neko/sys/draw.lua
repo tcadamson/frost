@@ -22,7 +22,7 @@ local q = nu.memoize(function(hash)
     return lg.newQuad(unpack(params))
 end)
 
-function draw:update(dt, pos, tex)
+function draw.update(dt, pos, tex)
     local img = nd[ffi.string(tex.file)]
     local hash = format("%d:%d:%d:%d:%d:%d", tex.x, tex.y, tex.w, tex.h, img:getDimensions())
     local shift = (nv(tex.w, tex.h) / 2):floor()

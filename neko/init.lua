@@ -11,7 +11,7 @@ local function convert(controls)
     return controls
 end
 
-nu.crawl("neko/system", function(id, path)
+nu.crawl("neko/sys", function(id, path)
     local sys = require(path)
     sys.buf = {}
     ne[#ne + 1] = sys

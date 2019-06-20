@@ -11,6 +11,8 @@ local nm = neko.mouse
 local nr = neko.run
 local nx = neko.axis
 local game = {}
+local p1
+local m1
 
 local function field(x, y)
     local r = 300
@@ -22,23 +24,10 @@ local function field(x, y)
 end
 
 function game:enter()
-    self.test = 199
-    for i = 0, self.test do
-        ne.new({
-            "pos",
-            tex = {
-                file = "cursor",
-                x = 0,
-                y = 0,
-                w = 27,
-                h = 27
-            }
-        })
-    end
-    self.player = ne.new({
+    p1 = ne.new({
         "steer",
         pos = {
-            x = 10,
+            x = 0,
             y = 200
         },
         phys = {v = 100},
@@ -50,28 +39,20 @@ function game:enter()
             h = 26
         }
     })
-    self.mob = ne.new({
+    m1 = ne.new({
         "steer",
         "pos",
         phys = {v = 50},
-        target = {e = self.player},
-        tex = ne.tex[self.player]
+        target = {e = p1},
+        tex = ne.tex[p1]
     })
-    na.focus(self.player)
+    na.focus(p1)
 end
 
 function game:update(dt)
-    local steer = ne.steer[self.player]
+    local steer = ne.steer[p1]
     steer.x, steer.y = ni:get("move")
-    for i = 0, self.test do
-        local j = i + 1
-        local scale = 10
-        local speed = 0.05
-        local shift = 100
-        ne.pos[i].x = j * scale
-        ne.pos[i].y = sin(nr.tick * speed - j) * scale + shift
-    end
-    if ni:pressed("act") then ne.toggle(self.mob, "steer") end
+    if ni:pressed("act") then ne.toggle(m1, "steer") end
     if ni:pressed("quit") then le.quit() end
     na.update(dt)
 end
@@ -80,10 +61,10 @@ function game:draw()
     nd.push()
     lg.push()
     lg.translate((-na.origin()):unpack())
-    field(0, 200)
+    field()
     nx.draw()
     if ni:down("focus") then
-        local mob = nv(ne.pos[self.mob])
+        local mob = nv(ne.pos[m1])
         local delta = mob - nm.pos()
         local step = 10
         for i = 0, floor(delta:len() / step) do

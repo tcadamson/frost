@@ -75,7 +75,7 @@ function ecs.update(dt)
                     break
                 end
             end
-            if not hole then sys:update(dt, unpack(buf)) end
+            if not hole then sys.update(dt, unpack(buf)) end
         end
     end
 end
