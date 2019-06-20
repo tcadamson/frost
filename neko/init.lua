@@ -1,5 +1,3 @@
-local nr = neko.run
-nr.tick = 0
 local nu = neko.util
 local nc = neko.config
 local nv = neko.video

@@ -1,5 +1,7 @@
 local floor = math.floor
 local sin = math.sin
+local lg = love.graphics
+local le = love.event
 local ne = neko.ecs
 local ni = neko.input
 local na = neko.camera
@@ -8,8 +10,6 @@ local nv = neko.vector
 local nm = neko.mouse
 local nr = neko.run
 local nx = neko.axis
-local lg = love.graphics
-local le = love.event
 local game = {}
 
 local function field(x, y)

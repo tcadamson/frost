@@ -1,3 +1,8 @@
+local tonumber = tonumber
+local format = string.format
+local match = string.match
+local gsub = string.gsub
+local lf = love.filesystem
 neko = setmetatable({
     config = {
         video = {
@@ -20,20 +25,16 @@ neko = setmetatable({
         }
     }
 }, {
-    -- access some libs before they're all loaded, e.g. util, vector
+    -- remove need for manual lib loading in init
     __index = function(t, k)
-        local status, out = pcall(function() return require("neko/lib/" .. k) end)
-        t[k] = status and out or require("neko/lib/import/" .. k)
+        local path = format("neko/lib/%s.lua", k)
+        local dir = lf.getInfo(path) and "" or "/import"
+        t[k] = require(gsub(path, "(/%w+)%..+$", dir .. "%1"))
         return t[k]
     end
 })
-local tonumber = tonumber
-local format = string.format
-local match = string.match
-local gsub = string.gsub
 local nu = neko.util
 local nc = neko.config
-local lf = love.filesystem
 local path = "config.ini"
 
 local function sync(...)
@@ -64,7 +65,6 @@ function love.conf(t)
                 local fps = nc.video.fps > 0 and nc.video.fps
                 local flags = sync(lw.getMode())
                 if flags then lw.setMode(nc.video.width, nc.video.height, flags) end
-                -- apply relevant config settings to libs
                 nr.framerate = fps
                 nr.rate = 1 / (fps or nc.def.video.fps)
             end,

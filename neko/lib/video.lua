@@ -1,10 +1,10 @@
 local sub = string.sub
 local byte = string.byte
 local find = string.find
+local lg = love.graphics
 local nu = neko.util
 local nc = neko.config
 local nv = neko.vector
-local lg = love.graphics
 local video = {}
 local color = {
     black = "#000000",

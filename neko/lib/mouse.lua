@@ -1,9 +1,9 @@
+local lg = love.graphics
+local lm = love.mouse
 local nc = neko.config
 local nv = neko.vector
 local nd = neko.video
 local na = neko.camera
-local lg = love.graphics
-local lm = love.mouse
 local mouse = {}
 
 function mouse.init()

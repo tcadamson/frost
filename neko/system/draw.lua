@@ -3,11 +3,11 @@ local tonumber = tonumber
 local floor = math.floor
 local format = string.format
 local gmatch = string.gmatch
+local lg = love.graphics
 local nv = neko.vector
 local nd = neko.video
 local nu = neko.util
 local nx = neko.axis
-local lg = love.graphics
 local ffi = require("ffi")
 local draw = {
     "pos",

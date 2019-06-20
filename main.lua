@@ -1,4 +1,6 @@
 require("neko.init")
+local lw = love.window
+local lt = love.timer
 local ns = neko.state
 local nl = neko.lerp
 local ne = neko.ecs
@@ -6,12 +8,11 @@ local ni = neko.input
 local nv = neko.video
 local nx = neko.axis
 local nr = neko.run
-local lw = love.window
-local lt = love.timer
 
 function love.load()
     ns:hook()
     ns:switch("game")
+    -- TODO: more sophisticated heuristic
     nr.loaded = true
     -- enable console output
     io.stdout:setvbuf("no")
