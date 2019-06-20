@@ -2,9 +2,8 @@ local unpack = unpack
 local axis = {}
 local q = setmetatable({}, {
     __index = function(t, k)
-        local batch = {}
-        t[k] = batch
-        return batch
+        t[k] = {}
+        return t[k]
     end
 })
 local min = 1

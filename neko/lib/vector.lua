@@ -5,7 +5,6 @@ local cos = math.cos
 local atan2 = math.atan2
 local floor = math.floor
 local format = string.format
-local nu = neko.util
 local nm = neko.mem
 local ffi = require("ffi")
 local vec = {}
@@ -16,32 +15,32 @@ local buf = nm.new([[
 ]])
 
 local meta = {
-    __unm = function(a) return vec(-a.x, -a.y) end,
-    __add = function(a, b) return vec(a.x + b.x, a.y + b.y) end,
-    __sub = function(a, b) return vec(a.x - b.x, a.y - b.y) end,
-    __div = function(a, b) return vec(a.x / b, a.y / b) end,
-    __eq = function(a, b) return a.x == b.x and a.y == b.y end,
-    __lt = function(a, b) return a.x < b and a.y < b end,
+    __index = vec,
+    __tostring = function(v)
+        return format("(%.3f, %.3f)", v:unpack())
+    end,
+    __add = function(a, b)
+        return vec(a.x + b.x, a.y + b.y)
+    end,
+    __sub = function(a, b)
+        return vec(a.x - b.x, a.y - b.y)
+    end,
     __mul = function(a, b)
         if type(a) == "number" then return vec(b.x * a, b.y * a) end
-        if type(b) == "cdata" then
-            return a.x * b.x + a.y * b.y
-        else
-            return vec(a.x * b, a.y * b)
-        end
+        if type(b) == "cdata" then return a.x * b.x + a.y * b.y end
+        return vec(a.x * b, a.y * b)
     end,
-    __index = vec,
-    __tostring = function(v) return format("(%.3f, %.3f)", v.x, v.y) end,
-    __call = function(t, x, y)
-        local vec = buf:add()
-        x = x or 0
-        y = y or 0
-        if type(x) == "cdata" then
-            y = x.y
-            x = x.x
-        end
-        vec.x, vec.y = x, y
-        return vec
+    __div = function(a, b)
+        return vec(a.x / b, a.y / b)
+    end,
+    __unm = function(a)
+        return vec(-a.x, -a.y)
+    end,
+    __eq = function(a, b)
+        return a.x == b.x and a.y == b.y
+    end,
+    __lt = function(a, b)
+        return a.x < b and a.y < b
     end
 }
 
@@ -64,8 +63,13 @@ function vec:rot()
     return vec(cos(theta) * len, sin(theta) * len)
 end
 
-function vec:copy()
-    return vec(self.x, self.y)
+function vec:set(x, y)
+    if type(x) == "cdata" then
+        -- using unpack would limit us to vectors only
+        self.x, self.y = x.x, x.y
+    else
+        self.x, self.y = x, y
+    end
 end
 
 function vec:unpack()
@@ -76,9 +80,17 @@ function vec:floor()
     return vec(floor(self.x), floor(self.y))
 end
 
-function vec:set(v)
-    self.x, self.y = v.x, v.y
-end
-
 ffi.metatype("vec", meta)
-return setmetatable(vec, meta)
+return setmetatable(vec, {
+    __call = function(t, x, y)
+        local vec = buf:add()
+        x = x or 0
+        y = y or 0
+        if type(x) == "cdata" then
+            y = x.y
+            x = x.x
+        end
+        vec:set(x, y)
+        return vec
+    end
+})

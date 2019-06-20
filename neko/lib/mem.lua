@@ -39,7 +39,15 @@ function mem.new(cdef)
     return ref
 end
 
-function mem:add()
+function mem:get(uid)
+    return access(self.blocks, uid)
+end
+
+function mem:set(uid, init)
+    access(self.blocks, uid, init)
+end
+
+function mem:add(init)
     if not nr.loaded then self.reserved = self.reserved + 1 end
     if nr.tick > tick then
         -- file-level allocations are reserved
@@ -49,15 +57,7 @@ function mem:add()
     end
     local uid = self.uid
     self.uid = self.uid + 1
-    return access(self.blocks, uid)
-end
-
-function mem:get(uid)
-    return access(self.blocks, uid)
-end
-
-function mem:set(uid, init)
-    access(self.blocks, uid, init)
+    return access(self.blocks, uid, init)
 end
 
 return mem

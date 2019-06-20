@@ -24,7 +24,9 @@ for k, v in pairs(com) do
         } %s
     ]], v, k))
     ecs[k] = setmetatable({}, {
-        __index = function(t, e) return com[k]:get(e) end,
+        __index = function(t, e)
+            return com[k]:get(e)
+        end,
         __newindex = function(t, e, v)
             v.status = 1
             com[k]:set(e, v)

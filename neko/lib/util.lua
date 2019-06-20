@@ -28,7 +28,7 @@ end
 
 function util.crawl(dir, call, filter)
     filter = filter or ""
-    for _, v in pairs(lf.getDirectoryItems(dir)) do
+    for k, v in pairs(lf.getDirectoryItems(dir)) do
         local short = format("%s/%s", dir, match(v, "[^.]+"))
         local ext = match(v, "%.%w+$") or ""
         local path = short .. ext
