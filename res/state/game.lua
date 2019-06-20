@@ -1,5 +1,4 @@
 local floor = math.floor
-local sin = math.sin
 local lg = love.graphics
 local le = love.event
 local ne = neko.ecs
@@ -8,7 +7,6 @@ local na = neko.camera
 local nd = neko.video
 local nv = neko.vector
 local nm = neko.mouse
-local nr = neko.run
 local nx = neko.axis
 local game = {}
 local p1
@@ -63,6 +61,10 @@ function game:draw()
     lg.translate((-na.origin()):unpack())
     field()
     nx.draw()
+    -- local v = na.origin()
+    -- local v2 = na.origin() + nd.area()
+    -- lg.circle("fill", v.x, v.y, 10)
+    -- lg.circle("fill", v2.x, v2.y, 10)
     if ni:down("focus") then
         local mob = nv(ne.pos[m1])
         local delta = mob - nm.pos()

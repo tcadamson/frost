@@ -8,6 +8,7 @@ local nv = neko.vector
 local nd = neko.video
 local nu = neko.util
 local nx = neko.axis
+local nc = neko.camera
 local ffi = require("ffi")
 local draw = {
     "pos",
@@ -26,7 +27,9 @@ function draw.update(dt, pos, tex)
     local img = nd[ffi.string(tex.file)]
     local hash = format("%d:%d:%d:%d:%d:%d", tex.x, tex.y, tex.w, tex.h, img:getDimensions())
     local shift = (nv(tex.w, tex.h) / 2):floor()
-    nx.queue(floor(pos.y), lg.draw, img, q[hash], pos.x, pos.y, 0, 1, 1, shift:unpack())
+    if not nc.culled(pos, shift) then
+        nx.queue(floor(pos.y), lg.draw, img, q[hash], pos.x, pos.y, 0, 1, 1, shift:unpack())
+    end
 end
 
 return draw
