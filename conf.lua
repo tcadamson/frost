@@ -58,7 +58,7 @@ end
 function love.conf(t)
     setmetatable(nc, {
         __index = {
-            def = nu.tbl_copy(nc),
+            def = nu.t_copy(nc),
             init = function()
                 local nr = neko.run
                 local lw = love.window

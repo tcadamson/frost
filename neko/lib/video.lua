@@ -1,6 +1,6 @@
 local sub = string.sub
 local byte = string.byte
-local find = string.find
+local match = string.match
 local lg = love.graphics
 local nu = neko.util
 local nc = neko.config
@@ -18,11 +18,11 @@ local canvas
 
 local rgb = nu.memoize(function(hex)
     local out = {}
-    local a, b = find(hex, "^#%x+$")
-    if a and (b - a) == len then
-        for i = a + 1, b, 2 do
+    local valid = match(hex, "^#-(%x+)$")
+    if valid and #valid == len then
+        for i = 1, len, 2 do
             local dec = 0
-            local seg = hex:sub(i, i + 1)
+            local seg = valid:sub(i, i + 1)
             for j = 1, #seg do
                 local char = sub(seg, j, j)
                 local test = (byte(char) - shift)
@@ -31,13 +31,14 @@ local rgb = nu.memoize(function(hex)
             out[#out + 1] = dec / max
         end
         return out
+    else
+        error(hex .. ": invalid hex")
     end
 end)
 
 for k, v in pairs(lg) do
     -- TODO: more sophisticated heuristic
-    local test = k == "clear" or k == "setColor"
-    lg[k] = test and function(hex)
+    lg[k] = k == "setColor" and function(hex)
         hex = hex or color.white
         v(rgb[hex])
     end or v
@@ -48,19 +49,19 @@ nu.crawl("res", function(id, path)
     video[id] = lg.newImage(path)
 end, "png")
 
+function video.area()
+    return nv(canvas:getDimensions()) / nc.video.scale
+end
+
 function video.resize(w, h)
     nc.video.width = w
     nc.video.height = h
     canvas = lg.newCanvas(w, h)
 end
 
-function video.area()
-    return nv(nc.video.width, nc.video.height) / nc.video.scale
-end
-
 function video.push()
     lg.setCanvas(canvas)
-    lg.clear()
+    lg.clear(rgb[color.white])
     lg.setBlendMode("alpha")
 end
 

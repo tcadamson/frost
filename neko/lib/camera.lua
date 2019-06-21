@@ -13,7 +13,7 @@ end
 
 function camera.culled(pos, shift)
     local net = nv(pos) - camera.origin()
-    return (nv(shift) + net) < 0 or (nv(shift) - net + nd.area()) < 0
+    return (shift + net) < 0 or (shift - net + nd.area()) < 0
 end
 
 function camera.update(dt)

@@ -8,22 +8,18 @@ local lf = love.filesystem
 local lw = love.window
 local util = {}
 
-function util.tbl_out(t)
+function util.t_out(t)
     for k, v in pairs(t) do
         print(format("k: %s v: %s", k, v))
     end
 end
 
-function util.tbl_copy(t)
+function util.t_copy(t)
     local out = {}
     for k, v in pairs(t) do
-        out[k] = type(v) == "table" and util.tbl_copy(v) or v
+        out[k] = type(v) == "table" and util.t_copy(v) or v
     end
     return out
-end
-
-function util.type(item)
-    return {[type(item)] = 1}
 end
 
 function util.crawl(dir, call, filter)
@@ -43,9 +39,8 @@ end
 function util.memoize(f)
     return setmetatable({}, {
         __index = function(t, k)
-            local v = f(k)
-            t[k] = v
-            return v
+            t[k] = f(k)
+            return t[k]
         end
     })
 end
