@@ -1,7 +1,9 @@
 local type = type
 local unpack = unpack
 local format = string.format
+local gmatch = string.gmatch
 local remove = table.remove
+local concat = table.concat
 local nu = neko.util
 local nm = neko.mem
 local ffi = require("ffi")
@@ -12,15 +14,26 @@ local com = {
     phys = "double v",
     steer = "double x, y",
     target = "uint16_t e",
-    tex = "const char* file; uint16_t x, y, w, h, sx, sy"
+    tex = "const char *file; uint16_t x, y, w, h, sx, sy"
 }
 local uid = 0
+
+local function hash(k, v)
+    local out = {}
+    for str in gmatch(com[k].cdef, "(%w+)[,;]") do
+        -- TODO: use struct instead of v for proper initialization
+        local f = v[str] or 0
+        out[#out + 1] = tonumber(f) or ffi.string(f)
+    end
+    return concat(out, ":")
+end
 
 for k, v in pairs(com) do
     com[k] = nm.new(format([[
         typedef struct {
             %s;
             uint8_t status;
+            const char *hash;
         } %s
     ]], v, k))
     ecs[k] = setmetatable({}, {
@@ -29,6 +42,7 @@ for k, v in pairs(com) do
         end,
         __newindex = function(t, e, v)
             v.status = 1
+            v.hash = hash(k, v)
             com[k]:set(e, v)
         end
     })
