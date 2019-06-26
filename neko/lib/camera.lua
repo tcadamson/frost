@@ -1,6 +1,8 @@
 local ne = neko.ecs
 local nv = neko.vector
 local nd = neko.video
+local nc = neko.config
+local nm = neko.mouse
 local camera = {
     pos = nv(),
     origin = nv()
@@ -9,7 +11,7 @@ local v = 15
 local target
 
 function camera.focus(e)
-    if not target then camera.pos:set(nv(ne.pos[e])) end
+    if not target then camera.pos:set(ne.pos[e]) end
     target = e
 end
 
@@ -21,8 +23,10 @@ end
 
 function camera.update(dt)
     local pos = camera.pos
-    camera.origin:set(pos - (nd.area / 2):floor())
+    local origin = camera.origin
+    origin:set(pos - (nd.area / 2):floor())
     pos:set(pos + (nv(ne.pos[target]) - pos) * v * dt)
+    nm.pos:set(nm.pos / nc.video.scale + origin)
 end
 
 return camera

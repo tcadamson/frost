@@ -90,10 +90,10 @@ function game:draw()
     nx.draw()
     if ni:down("focus") then
         local mob = nv(ne.pos[m1])
-        local delta = mob - nm.pos()
+        local delta = mob - nm.pos
         local step = 10
         for i = 0, floor(delta:len() / step) do
-            local pos = nm.pos() + delta:norm() * i * step
+            local pos = nm.pos + delta:norm() * i * step
             lg.circle("fill", pos.x, pos.y, 2)
         end
     end

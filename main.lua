@@ -1,6 +1,7 @@
 require("neko.init")
 local lw = love.window
 local lt = love.timer
+local lm = love.mouse
 local ns = neko.state
 local nl = neko.lerp
 local ne = neko.ecs
@@ -8,6 +9,7 @@ local ni = neko.input
 local nv = neko.video
 local nx = neko.axis
 local nr = neko.run
+local nm = neko.mouse
 
 function love.load()
     ns:hook()
@@ -20,6 +22,7 @@ end
 
 function love.update(dt)
     lw.setTitle("fps ~ " .. lt.getFPS())
+    nm.pos:set(lm.getPosition())
     nx.refresh()
     nl.update(dt)
     ne.update(dt)
