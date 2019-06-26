@@ -12,7 +12,7 @@ local com = {
     phys = "double v",
     steer = "double x, y",
     target = "uint16_t e",
-    tex = "const char* file; uint16_t x, y, w, h"
+    tex = "const char* file; uint16_t x, y, w, h, sx, sy"
 }
 local uid = 0
 

@@ -1,4 +1,5 @@
 local floor = math.floor
+local sin = math.sin
 local lg = love.graphics
 local le = love.event
 local ne = neko.ecs
@@ -7,6 +8,7 @@ local na = neko.camera
 local nd = neko.video
 local nv = neko.vector
 local nm = neko.mouse
+local nr = neko.run
 local nx = neko.axis
 local game = {}
 local p1
@@ -22,6 +24,21 @@ local function field(x, y)
 end
 
 function game:enter()
+    self.test = 999
+    for i = 0, self.test do
+        ne.new({
+            "pos",
+            tex = {
+                file = "cursor",
+                x = 0,
+                y = 0,
+                w = 27,
+                h = 27,
+                sx = 13,
+                sy = 13
+            }
+        })
+    end
     p1 = ne.new({
         "steer",
         pos = {
@@ -34,7 +51,9 @@ function game:enter()
             x = 0,
             y = 0,
             w = 26,
-            h = 26
+            h = 26,
+            sx = 13,
+            sy = 13
         }
     })
     m1 = ne.new({
@@ -50,6 +69,14 @@ end
 function game:update(dt)
     local steer = ne.steer[p1]
     steer.x, steer.y = ni:get("move")
+    for i = 0, self.test do
+        local j = i + 1
+        local scale = 10
+        local speed = 0.05
+        local shift = 100
+        ne.pos[i].x = j * scale
+        ne.pos[i].y = sin(nr.tick * speed - j) * scale + shift
+    end
     if ni:pressed("act") then ne.toggle(m1, "steer") end
     if ni:pressed("quit") then le.quit() end
     na.update(dt)
@@ -58,13 +85,9 @@ end
 function game:draw()
     nd.push()
     lg.push()
-    lg.translate((-na.origin()):unpack())
+    lg.translate((-na.origin):unpack())
     field()
     nx.draw()
-    -- local v = na.origin()
-    -- local v2 = na.origin() + nd.area()
-    -- lg.circle("fill", v.x, v.y, 10)
-    -- lg.circle("fill", v2.x, v2.y, 10)
     if ni:down("focus") then
         local mob = nv(ne.pos[m1])
         local delta = mob - nm.pos()

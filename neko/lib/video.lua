@@ -5,7 +5,9 @@ local lg = love.graphics
 local nu = neko.util
 local nc = neko.config
 local nv = neko.vector
-local video = {}
+local video = {
+    area = nv()
+}
 local color = {
     black = "#000000",
     white = "#ffffff"
@@ -49,13 +51,10 @@ nu.crawl("res", function(id, path)
     video[id] = lg.newImage(path)
 end, "png")
 
-function video.area()
-    return nv(canvas:getDimensions()) / nc.video.scale
-end
-
 function video.resize(w, h)
     nc.video.width = w
     nc.video.height = h
+    video.area:set(nv(w, h) / nc.video.scale)
     canvas = lg.newCanvas(w, h)
 end
 
