@@ -3,7 +3,6 @@ local type = type
 local rawset = rawset
 local format = string.format
 local match = string.match
-local gsub = string.gsub
 local lf = love.filesystem
 local lw = love.window
 local util = {}

@@ -20,7 +20,6 @@ function mem.new(cdef)
     local id = match(cdef, "(%w+)%s-$")
     local ref = setmetatable({
         blocks = {},
-        cdef = cdef,
         id = id,
         uid = 0,
         reserved = 0

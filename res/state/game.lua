@@ -28,15 +28,7 @@ function game:enter()
     for i = 0, self.test do
         ne.new({
             "pos",
-            tex = {
-                file = "cursor",
-                x = 0,
-                y = 0,
-                w = 27,
-                h = 27,
-                sx = 13,
-                sy = 13
-            }
+            tex = {hash = "cursor:0:0:27:27:13:13"}
         })
     end
     p1 = ne.new({
@@ -46,22 +38,14 @@ function game:enter()
             y = 200
         },
         phys = {v = 100},
-        tex = {
-            file = "test",
-            x = 0,
-            y = 0,
-            w = 26,
-            h = 26,
-            sx = 13,
-            sy = 13
-        }
+        tex = {hash = "test:0:0:26:26:13:13"}
     })
     m1 = ne.new({
         "steer",
         "pos",
         phys = {v = 50},
         target = {e = p1},
-        tex = ne.tex[p1]
+        tex = {hash = "test:0:0:26:26:13:13"}
     })
     na.focus(p1)
 end

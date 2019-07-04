@@ -1,39 +1,30 @@
 local type = type
 local unpack = unpack
+local tonumber = tonumber
 local format = string.format
 local gmatch = string.gmatch
+local gsub = string.gsub
 local remove = table.remove
-local concat = table.concat
 local nu = neko.util
 local nm = neko.mem
 local ffi = require("ffi")
 local ecs = {}
+local com = {}
 local dead = {}
-local com = {
+local cdef = {
     pos = "double x, y",
     phys = "double v",
     steer = "double x, y",
     target = "uint16_t e",
-    tex = "const char *file; uint16_t x, y, w, h, sx, sy"
+    tex = "const char *file, *hash; uint16_t x, y, w, h, sx, sy"
 }
 local uid = 0
 
-local function hash(k, v)
-    local out = {}
-    for str in gmatch(com[k].cdef, "(%w+)[,;]") do
-        -- TODO: use struct instead of v for proper initialization
-        local f = v[str] or 0
-        out[#out + 1] = tonumber(f) or ffi.string(f)
-    end
-    return concat(out, ":")
-end
-
-for k, v in pairs(com) do
+for k, v in pairs(cdef) do
     com[k] = nm.new(format([[
         typedef struct {
             %s;
             uint8_t status;
-            const char *hash;
         } %s
     ]], v, k))
     ecs[k] = setmetatable({}, {
@@ -42,7 +33,17 @@ for k, v in pairs(com) do
         end,
         __newindex = function(t, e, v)
             v.status = 1
-            v.hash = hash(k, v)
+            -- component hash useful for memoization in systems
+            -- here we initialize component properties from a provided hash
+            if v.hash then
+                local temp = v.hash
+                for str in gmatch(gsub(cdef[k], "hash", "") .. ";", "(%w+)[,;]") do
+                    temp = gsub(temp, "[^:]+", function(match)
+                        v[str] = tonumber(match) or match
+                        return ""
+                    end, 1)
+                end
+            end
             com[k]:set(e, v)
         end
     })
