@@ -2,6 +2,7 @@ local unpack = unpack
 local tonumber = tonumber
 local floor = math.floor
 local gmatch = string.gmatch
+local gsub = string.gsub
 local lg = love.graphics
 local nd = neko.video
 local nu = neko.util
@@ -15,22 +16,25 @@ local draw = {
 
 local q = nu.memoize(function(hash)
     local params = {}
-    for str in gmatch(hash, "[^:]+") do
-        params[#params + 1] = tonumber(str) or str
+    local to
+    for str in gmatch(gsub(hash, "%d+:%d+$", "fw:fh"), "[^:]+") do
+        local img = nd[str]
+        if img then
+            to = {
+                fw = img:getWidth(),
+                fh = img:getHeight()
+            }
+        end
+        params[#params + 1] = to[str] or tonumber(str)
     end
-    local img = nd[table.remove(params, 1)]
-    params[#params - 1] = img:getWidth()
-    params[#params] = img:getHeight()
-    return {
-        img = img,
-        q = lg.newQuad(unpack(params))
-    }
+    return lg.newQuad(unpack(params))
 end)
 
 function draw.update(dt, pos, tex)
     if not nc.culled(pos, tex) then
-        local data = q[ffi.string(tex.hash)]
-        nx.queue(floor(pos.y), lg.draw, data.img, data.q, pos.x, pos.y, 0, 1, 1, tex.sx, tex.sy)
+        local f = nd[ffi.string(tex.file)]
+        local q = q[ffi.string(tex.hash)]
+        nx.queue(floor(pos.y), lg.draw, f, q, pos.x, pos.y, 0, 1, 1, tex.sx, tex.sy)
     end
 end
 
