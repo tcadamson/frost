@@ -62,11 +62,9 @@ function love.conf(t)
             init = function()
                 local nr = neko.run
                 local lw = love.window
-                local fps = nc.video.fps > 0 and nc.video.fps
                 local flags = sync(lw.getMode())
                 if flags then lw.setMode(nc.video.width, nc.video.height, flags) end
-                nr.framerate = fps
-                nr.rate = 1 / (fps or nc.def.video.fps)
+                nr.framerate = nc.video.fps > 0 and nc.video.fps
             end,
             save = function()
                 local out = ""
