@@ -30,7 +30,9 @@ local q = nu.memoize(function(hash)
     return lg.newQuad(unpack(params))
 end)
 
-function draw.update(dt, pos, tex)
+function draw.update(e, dt)
+    local pos = draw.pos
+    local tex = draw.tex
     if not nc.culled(pos, tex) then
         local f = nd[ffi.string(tex.file)]
         local q = q[ffi.string(tex.hash)]

@@ -1,5 +1,4 @@
 local type = type
-local unpack = unpack
 local tonumber = tonumber
 local format = string.format
 local gmatch = string.gmatch
@@ -78,19 +77,18 @@ function ecs.update(dt)
     for e = 0, uid do
         for i = 1, #ecs do
             local sys = ecs[i]
-            local buf = sys.buf
             local hole
             for j = 1, #sys do
                 local id = sys[j]
                 local struct = com[id]:get(e)
                 if struct.status > 0 then
-                    buf[j] = struct
+                    sys[id] = struct
                 else
                     hole = true
                     break
                 end
             end
-            if not hole then sys.update(dt, unpack(buf)) end
+            if not hole then sys.update(e, dt) end
         end
     end
 end

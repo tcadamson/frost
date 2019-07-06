@@ -12,9 +12,7 @@ local function convert(controls)
 end
 
 nu.crawl("neko/sys", function(id, path)
-    local sys = require(path)
-    sys.buf = {}
-    ne[#ne + 1] = sys
+    ne[#ne + 1] = require(path)
 end)
 nc.init()
 nm.init()
