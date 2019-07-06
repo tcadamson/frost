@@ -10,6 +10,7 @@ local nv = neko.vector
 local nm = neko.mouse
 local nr = neko.run
 local nx = neko.axis
+local nt = neko.stats
 local game = {}
 local p1
 local m1
@@ -82,6 +83,7 @@ function game:draw()
         end
     end
     lg.pop()
+    nt.draw()
     nd.pop()
 end
 

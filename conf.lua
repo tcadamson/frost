@@ -99,6 +99,7 @@ function love.conf(t)
         nc.save()
     end
     local w = sync(t.window)
+    w.title = lf.getIdentity()
     w.resizable = true
     w.icon = nil
 end

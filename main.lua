@@ -1,6 +1,4 @@
 require("neko.init")
-local lw = love.window
-local lt = love.timer
 local lm = love.mouse
 local ns = neko.state
 local nl = neko.lerp
@@ -21,7 +19,6 @@ function love.load()
 end
 
 function love.update(dt)
-    lw.setTitle("fps ~ " .. lt.getFPS())
     nm.pos:set(lm.getPosition())
     nx.refresh()
     nl.update(dt)
