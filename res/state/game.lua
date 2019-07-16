@@ -11,6 +11,7 @@ local nm = neko.mouse
 local nr = neko.run
 local nx = neko.axis
 local nt = neko.stats
+local nu = neko.ui
 local game = {}
 local p1
 local m1
@@ -49,6 +50,17 @@ function game:enter()
         tex = {hash = "test:0:0:26:26:13:13"}
     })
     na.focus(p1)
+    nu.load([[
+        <bar>
+            <item>
+                <item>...</item>
+            </item>
+            <item>...</item>
+        </bar>
+        <bar>
+            <item>...</item>
+        </bar>
+    ]])
 end
 
 function game:update(dt)
