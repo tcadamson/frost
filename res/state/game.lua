@@ -96,6 +96,7 @@ function game:draw()
     end
     lg.pop()
     nt.draw()
+    nu.draw()
     nd.pop()
 end
 
