@@ -57,7 +57,7 @@ function vec:norm()
     return len == 0 and vec(0, 0) or vec(self.x / len, self.y / len)
 end
 
-function vec:rot()
+function vec:rot(add)
     local len = self:len()
     local theta = self:theta() + add
     return vec(cos(theta) * len, sin(theta) * len)

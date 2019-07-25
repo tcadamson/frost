@@ -74,7 +74,10 @@ function game:update(dt)
         ne.pos[i].x = j * scale
         ne.pos[i].y = sin(nr.tick * speed - j) * scale + shift
     end
-    if ni:pressed("act") then ne.toggle(m1, "steer") end
+    if ni:pressed("act") then
+        na.shake()
+        ne.toggle(m1, "steer")
+    end
     if ni:pressed("quit") then le.quit() end
     na.update(dt)
 end
@@ -82,7 +85,7 @@ end
 function game:draw()
     nd.push()
     lg.push()
-    lg.translate((-na.origin):unpack())
+    lg.translate((-na.origin + na.shift):unpack())
     field()
     nx.draw()
     if ni:down("focus") then
