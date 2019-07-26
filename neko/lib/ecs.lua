@@ -48,15 +48,16 @@ for k, v in pairs(cdef) do
     })
 end
 
-function ecs.new(data)
-    local e = uid
-    uid = remove(dead) or uid + 1
+function ecs.new(data, override)
+    local e = remove(dead) or uid
+    uid = uid + 1
+    if type(data) == "string" then data = require("res/ecs/" .. data) end
     for k, v in pairs(data) do
         if type(k) == "number" then
             k = v
             v = {}
         end
-        ecs[k][e] = v
+        ecs[k][e] = override and override[k] or v
     end
     return e
 end

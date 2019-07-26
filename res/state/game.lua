@@ -13,6 +13,7 @@ local nx = neko.axis
 local nt = neko.stats
 local nu = neko.ui
 local game = {}
+local tests = 999
 local p1
 local m1
 
@@ -26,28 +27,17 @@ local function field(x, y)
 end
 
 function game:enter()
-    self.test = 999
-    for i = 0, self.test do
-        ne.new({
-            "pos",
-            tex = {hash = "cursor:0:0:27:27:13:13"}
-        })
+    for i = 0, tests do
+        ne.new("m2")
     end
-    p1 = ne.new({
-        "steer",
+    p1 = ne.new("p1", {
         pos = {
             x = 0,
             y = 200
-        },
-        phys = {v = 100},
-        tex = {hash = "test:0:0:26:26:13:13"}
+        }
     })
-    m1 = ne.new({
-        "steer",
-        "pos",
-        phys = {v = 50},
-        target = {e = p1},
-        tex = {hash = "test:0:0:26:26:13:13"}
+    m1 = ne.new("m1", {
+        target = {e = p1}
     })
     na.focus(p1)
     nu.load([[
@@ -66,7 +56,7 @@ end
 function game:update(dt)
     local steer = ne.steer[p1]
     steer.x, steer.y = ni:get("move")
-    for i = 0, self.test do
+    for i = 0, tests do
         local j = i + 1
         local scale = 10
         local speed = 0.05

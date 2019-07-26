@@ -1,3 +1,4 @@
+local type = type
 local tonumber = tonumber
 local format = string.format
 local match = string.match
