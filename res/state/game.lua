@@ -42,13 +42,7 @@ function game:enter()
     na.focus(p1)
     nu.load([[
         <bar>
-            <item>
-                <item>...</item>
-            </item>
-            <item>...</item>
-        </bar>
-        <bar>
-            <item>...</item>
+            <item>%stats.fetch</item>
         </bar>
     ]])
 end
@@ -88,7 +82,7 @@ function game:draw()
         end
     end
     lg.pop()
-    nt.draw()
+    -- nt.draw()
     nu.draw()
     nd.pop()
 end
