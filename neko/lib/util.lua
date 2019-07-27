@@ -1,5 +1,5 @@
-local select = select
 local type = type
+local select = select
 local rawset = rawset
 local format = string.format
 local match = string.match
