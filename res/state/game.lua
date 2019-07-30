@@ -41,9 +41,17 @@ function game:enter()
     })
     na.focus(p1)
     nu.load([[
-        <bar>
-            <item>%stats.fetch</item>
-        </bar>
+        <item>
+            [ui test]
+            <item dir:x>
+                %stats.fetch
+                <item dir:y>
+                    top
+                    <item>bottom</item>
+                </item>
+            </item>
+            <item>under</item>
+        </item>
     ]])
 end
 

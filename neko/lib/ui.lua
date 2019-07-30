@@ -1,9 +1,9 @@
 local type = type
 local tonumber = tonumber
 local rawset = rawset
+local max = math.max
 local format = string.format
 local match = string.match
-local find = string.find
 local gmatch = string.gmatch
 local gsub = string.gsub
 local remove = table.remove
@@ -14,12 +14,8 @@ local ui = {}
 local font = lg.newFont()
 
 local draw = setmetatable({
-    item = function(body)
-        local box = nv(font:getWidth(body), font:getHeight(body))
-        lg.setColor("#6a6a6a")
-        lg.rectangle("fill", 0, 0, box:unpack())
-        lg.setColor()
-        lg.print(body)
+    item = function(node)
+        lg.print(node.text, node.pos:unpack())
     end
 }, {
     __index = function(t, k)
@@ -27,34 +23,42 @@ local draw = setmetatable({
     end
 })
 
-local function iter(level, call)
-    local i = 1
+local function iter(level, call, rev)
+    local i = rev and #level or 1
     local node = level[i]
     while node do
-        call(node)
-        if #node > 0 then iter(node, call) end
-        i = i + 1
+        if node.status > 0 then
+            if not rev then
+                call(node)
+                iter(node, call)
+            else
+                iter(node, call, rev)
+                call(node)
+            end
+        end
+        i = i + (rev and -1 or 1)
         node = level[i]
     end
 end
 
 local function node(tag, props, body)
-    -- context restricts access to key-based parent props
-    -- using ui as __index would allow infinite number-based indexing
-    local context = setmetatable({status = 1}, {
-        __index = ui.context
-    })
+    -- props can exist locally or be inherited
+    local data = {status = 1}
     for k, v in gmatch(props, "(%w+):(%w+)") do
-        context[k] = tonumber(v) or v
+        data[k] = tonumber(v) or v
     end
+    props = setmetatable(data, {
+        __index = ui.props
+    })
     return setmetatable({
         tag = tag,
         body = body,
-        context = context
+        props = props,
+        root = ui
     }, {
-        __index = context,
+        __index = props,
         __newindex = function(t, k, v)
-            t = type(k) == "number" and t or context
+            t = type(k) == "number" and t or props
             rawset(t, k, v)
         end
     })
@@ -67,14 +71,13 @@ end
 function ui.load(def)
     local stack = {}
     for tag, props, body in gmatch(def, "<([%a/]+)(.-)>([^<]*)") do
-        -- ensure body is nil if it lacks any content
-        body = find(body, "%w") and gsub(match(body, "%s*(.-)%s*$"), "(%c)%s+", "%1")
+        body = match(body, "%w") and gsub(match(body, "%s*(.-)%s*$"), "(%c)%s+", "%1")
         if match(tag, "/%a+") then
             local last = ui.tag
             if not last then
                 error(tag .. ": no opening tag")
             else
-                if not find(tag, last) then error(format("%s: expected /%s", tag, last)) end
+                if not match(tag, last) then error(format("%s: expected /%s", tag, last)) end
                 ui = remove(stack)
             end
         else
@@ -84,22 +87,50 @@ function ui.load(def)
             ui = new
         end
     end
-    if ui.tag then error(ui.tag .. ": no closing tag") end
+    if #ui > 1 then
+        error("root: nodes > 1")
+    elseif ui.tag then
+        error(ui.tag .. ": no closing tag")
+    end
 end
 
 function ui.draw()
     iter(ui, function(node)
         local body = node.body
-        if body and node.status > 0 then
+        local box = nv()
+        if body then
             for token in gmatch(body, "%%([^%s]+)") do
-                local level = neko
+                local depth = neko
                 for sub in gmatch(token, "%w+") do
-                    level = level[sub]
+                    depth = depth[sub]
                 end
-                body = gsub(body, format("%%%%%s", token), level())
+                body = gsub(body, format("%%%%%s", token), depth())
             end
-            draw[node.tag](body)
+            box:set(font:getWidth(body), font:getHeight(body))
         end
+        for i = 1, #node do
+            local sub = node[i]
+            local p = sub.pos
+            local b = sub.box
+            if node.dir == "x" then
+                p.x = box.x
+                box:set(box.x + b.x, max(box.y, b.y))
+            else
+                p.y = box.y
+                box:set(max(box.x, b.x), box.y + b.y)
+            end
+        end
+        node.box = box
+        node.pos = nv()
+        node.text = body
+    end, true)
+    iter(ui, function(node)
+        local pos = node.pos
+        pos:set(nv(node.root.pos) + pos)
+        lg.setColor("#6a6a6a")
+        lg.rectangle("fill", pos.x, pos.y, node.box:unpack())
+        lg.setColor()
+        draw[node.tag](node)
     end)
 end
 

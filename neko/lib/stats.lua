@@ -1,7 +1,6 @@
 local loadstring = loadstring
 local format = string.format
 local match = string.match
-local find = string.find
 local concat = table.concat
 local lg = love.graphics
 local nr = neko.run
@@ -35,7 +34,7 @@ function stats.fetch()
         local item = items[i]
         local id = match(item, "%w+")
         local token = match(item, ":(.+)") or "%d"
-        if not stats[i] or not find(item, "!") or nr.tick % step == 0 then
+        if not stats[i] or not match(item, "!") or nr.tick % step == 0 then
             stats[i] = format("%s ~ " .. token, id, calls[i]())
         end
     end
