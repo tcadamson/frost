@@ -125,8 +125,17 @@ function ui.draw()
         node.pos = pos
     end, true)
     iter(ui, function(node)
+        local box = node.box
         local pos = node.pos
-        pos:set(nv(node.root.pos) + pos)
+        local pin = node.pin
+        local root = node.root
+        if pin then
+            local anchor, x, y = match(pin, "(c-)%((.+),%s*(.+)%)")
+            pos:set(x * root.box.x, y * root.box.y)
+            if #anchor > 0 then pos:set(pos - box / 2) end
+        else
+            pos:set(nv(root.pos) + pos)
+        end
         lg.setColor("#6a6a6a")
         lg.rectangle("fill", pos.x, pos.y, node.box:unpack())
         lg.setColor()
