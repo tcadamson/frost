@@ -5,8 +5,9 @@ local lg = love.graphics
 local nu = neko.util
 local nc = neko.config
 local nv = neko.vector
+local ni = neko.ui
 local video = {
-    area = nv()
+    box = nv()
 }
 local color = {
     black = "#000000",
@@ -52,10 +53,12 @@ nu.crawl("res", function(id, path)
 end, "png")
 
 function video.resize(w, h)
+    local box = nv(w, h) / nc.video.scale
     nc.video.width = w
     nc.video.height = h
-    video.area:set(nv(w, h) / nc.video.scale)
     canvas = lg.newCanvas(w, h)
+    video.box:set(box)
+    ni.box:set(box)
 end
 
 function video.push()

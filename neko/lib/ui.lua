@@ -9,13 +9,16 @@ local gsub = string.gsub
 local remove = table.remove
 local lg = love.graphics
 local nv = neko.vector
-local ui = {}
+local text = {}
+local ui = {
+    box = nv()
+}
 -- TODO: centralized font system
 local font = lg.newFont()
 
 local draw = setmetatable({
-    item = function(node)
-        lg.print(node.text, node.pos:unpack())
+    text = function(node)
+        lg.print(text[node], node.pos:unpack())
     end
 }, {
     __index = function(t, k)
@@ -43,13 +46,11 @@ end
 
 local function node(tag, props, body)
     -- props can exist locally or be inherited
-    local data = {status = 1}
-    for k, v in gmatch(props, "(%w+):(%w+)") do
-        data[k] = tonumber(v) or v
+    local str = props
+    local props = {status = 1}
+    for k in gmatch(str, "(%a+):") do
+        props[k] = gsub(match(str, k .. ":([^:]+)"), "%s+%a+$", "")
     end
-    props = setmetatable(data, {
-        __index = ui.props
-    })
     return setmetatable({
         tag = tag,
         body = body,
@@ -87,9 +88,7 @@ function ui.load(def)
             ui = new
         end
     end
-    if #ui > 1 then
-        error("root: nodes > 1")
-    elseif ui.tag then
+    if ui.tag then
         error(ui.tag .. ": no closing tag")
     end
 end
@@ -97,32 +96,33 @@ end
 function ui.draw()
     iter(ui, function(node)
         local body = node.body
+        local dir = node.dir or "y"
         local box = nv()
+        local pos = nv()
         if body then
             for token in gmatch(body, "%%([^%s]+)") do
-                local depth = neko
+                local zone = neko
                 for sub in gmatch(token, "%w+") do
-                    depth = depth[sub]
+                    zone = zone[sub]
                 end
-                body = gsub(body, format("%%%%%s", token), depth())
+                if type(zone) == "function" then zone = zone() end
+                body = gsub(body, format("%%%%%s", token), zone)
             end
+            text[node] = body
             box:set(font:getWidth(body), font:getHeight(body))
         end
         for i = 1, #node do
             local sub = node[i]
-            local p = sub.pos
-            local b = sub.box
-            if node.dir == "x" then
-                p.x = box.x
-                box:set(box.x + b.x, max(box.y, b.y))
+            local temp = sub.box
+            sub.pos[dir] = box[dir]
+            if dir == "y" then
+                box:set(max(box.x, temp.x), box.y + temp.y)
             else
-                p.y = box.y
-                box:set(max(box.x, b.x), box.y + b.y)
+                box:set(box.x + temp.x, max(box.y, temp.y))
             end
         end
         node.box = box
-        node.pos = nv()
-        node.text = body
+        node.pos = pos
     end, true)
     iter(ui, function(node)
         local pos = node.pos

@@ -27,7 +27,7 @@ end
 function camera.culled(pos, tex)
     local shift = nv(tex.sx, tex.sy)
     local net = nv(pos) - camera.origin
-    return (shift + net) < 0 or (shift - net + nd.area) < 0
+    return (shift + net) < 0 or (shift - net + nd.box) < 0
 end
 
 function camera.shake()
@@ -40,7 +40,7 @@ function camera.update(dt)
     local origin = camera.origin
     camera.shift:set(amp * nv(exp(-t) * cos(2 * pi * t)))
     pos:set(pos + (nv(ne.pos[target]) - pos) * v * dt)
-    origin:set(pos - (nd.area / 2):floor())
+    origin:set(pos - (nd.box / 2):floor())
     nm.pos:set(nm.pos / nc.video.scale + origin)
     t = t + step
     amp = amp * decay
