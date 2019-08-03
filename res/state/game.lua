@@ -51,7 +51,7 @@ function game:enter()
                 </text>
             </text>
         </text>
-        <text pin:(0, 0.5)>under</text>
+        <text pin:c(0, 0.5)>under</text>
     ]])
 end
 

@@ -1,6 +1,7 @@
 local type = type
 local tonumber = tonumber
 local rawset = rawset
+local min = math.min
 local max = math.max
 local format = string.format
 local match = string.match
@@ -11,7 +12,8 @@ local lg = love.graphics
 local nv = neko.vector
 local text = {}
 local ui = {
-    box = nv()
+    box = nv(),
+    pos = nv()
 }
 -- TODO: centralized font system
 local font = lg.newFont()
@@ -131,11 +133,12 @@ function ui.draw()
         local root = node.root
         if pin then
             local anchor, x, y = match(pin, "(c-)%((.+),%s*(.+)%)")
-            pos:set(x * root.box.x, y * root.box.y)
-            if #anchor > 0 then pos:set(pos - box / 2) end
-        else
-            pos:set(nv(root.pos) + pos)
+            local shift = nv(#anchor > 0 and box / 2)
+            local edge = root.box - box
+            pos:set(nv(x * root.box.x, y * root.box.y) - shift)
+            pos:set(min(max(pos.x, 0), edge.x), min(max(pos.y, 0), edge.y))
         end
+        pos:set(nv(root.pos) + pos)
         lg.setColor("#6a6a6a")
         lg.rectangle("fill", pos.x, pos.y, node.box:unpack())
         lg.setColor()
