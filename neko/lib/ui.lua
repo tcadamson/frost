@@ -10,6 +10,7 @@ local gsub = string.gsub
 local remove = table.remove
 local lg = love.graphics
 local nv = neko.vector
+local nm = neko.mouse
 local text = {}
 local ui = {
     box = nv(),

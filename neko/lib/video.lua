@@ -5,13 +5,16 @@ local lg = love.graphics
 local nu = neko.util
 local nc = neko.config
 local nv = neko.vector
-local ni = neko.ui
 local video = {
     box = nv()
 }
 local color = {
     black = "#000000",
     white = "#ffffff"
+}
+local override = {
+    "setColor",
+    "clear"
 }
 local base = 16
 local len = 6
@@ -39,12 +42,13 @@ local rgb = nu.memoize(function(hex)
     end
 end)
 
-for k, v in pairs(lg) do
-    -- TODO: more sophisticated heuristic
-    lg[k] = k == "setColor" and function(hex)
-        hex = hex or color.white
-        v(rgb[hex])
-    end or v
+for i = 1, #override do
+    local call = override[i]
+    local old = lg[call]
+    lg[call] = function(hex)
+        hex = type(hex) == "string" and hex or color.white
+        old(rgb[hex])
+    end
 end
 lg.setLineStyle("rough")
 lg.setDefaultFilter("nearest", "nearest")
@@ -58,12 +62,14 @@ function video.resize(w, h)
     nc.video.height = h
     canvas = lg.newCanvas(w, h)
     video.box:set(box)
-    ni.box:set(box)
+    -- ui depends on mouse which depends on video
+    -- if we require ui at the file level, we get a fatal loop
+    neko.ui.box:set(box)
 end
 
 function video.push()
     lg.setCanvas(canvas)
-    lg.clear(rgb[color.white])
+    lg.clear()
     lg.setBlendMode("alpha")
 end
 
