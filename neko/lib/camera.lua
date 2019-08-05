@@ -5,7 +5,6 @@ local ne = neko.ecs
 local nv = neko.vector
 local nd = neko.video
 local nc = neko.config
-local nm = neko.mouse
 local camera = {
     pos = nv(),
     origin = nv(),
@@ -38,10 +37,9 @@ end
 function camera.update(dt)
     local pos = camera.pos
     local origin = camera.origin
-    camera.shift:set(amp * nv(exp(-t) * cos(2 * pi * t)))
+    if amp > 0 then camera.shift:set(amp * nv(exp(-t) * cos(2 * pi * t))) end
     pos:set(pos + (nv(ne.pos[target]) - pos) * v * dt)
     origin:set(pos - (nd.box / 2):floor())
-    nm.pos:set(nm.pos / nc.video.scale + origin)
     t = t + step
     amp = amp * decay
 end

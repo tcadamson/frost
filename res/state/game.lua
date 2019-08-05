@@ -71,21 +71,20 @@ function game:update(dt)
         ne.toggle(m1, "steer")
     end
     if ni:pressed("quit") then le.quit() end
-    na.update(dt)
 end
 
 function game:draw()
     nd.push()
     lg.push()
-    lg.translate((-na.origin + na.shift):unpack())
+    lg.translate((na.shift - na.origin):unpack())
     field()
     nx.draw()
     if ni:down("focus") then
         local mob = nv(ne.pos[m1])
-        local delta = mob - nm.pos
+        local delta = mob - nm.world
         local step = 10
         for i = 0, floor(delta:len() / step) do
-            local pos = nm.pos + delta:norm() * i * step
+            local pos = nm.world + delta:norm() * i * step
             lg.circle("fill", pos.x, pos.y, 2)
         end
     end

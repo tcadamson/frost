@@ -61,11 +61,10 @@ function love.conf(t)
         __index = {
             def = nu.t_copy(nc),
             init = function()
-                local nr = neko.run
                 local lw = love.window
                 local flags = sync(lw.getMode())
                 if flags then lw.setMode(nc.video.width, nc.video.height, flags) end
-                nr.framerate = nc.video.fps > 0 and nc.video.fps
+                neko.run.framerate = nc.video.fps > 0 and nc.video.fps
             end,
             save = function()
                 local out = ""
@@ -74,12 +73,12 @@ function love.conf(t)
                     for k, v in pairs(section) do
                         out = out .. format("%s=%s\n", k, v)
                     end
-                    lf.write(p or path, out)
+                    lf.write(path, out)
                 end
             end
         }
     })
-    lf.setIdentity("frost")
+    lf.setIdentity("neko")
     if lf.getInfo(path, "file") then
         local section = "def"
         for line in lf.lines(path) do

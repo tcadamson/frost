@@ -4,7 +4,8 @@ local nc = neko.config
 local nv = neko.vector
 local nd = neko.video
 local mouse = {
-    pos = nv()
+    pos = nv(),
+    world = nv()
 }
 
 function mouse.init()

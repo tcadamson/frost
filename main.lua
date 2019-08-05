@@ -8,6 +8,9 @@ local nv = neko.video
 local nx = neko.axis
 local nr = neko.run
 local nm = neko.mouse
+local nc = neko.config
+local nv = neko.vector
+local na = neko.camera
 
 function love.load()
     ns:hook()
@@ -19,10 +22,12 @@ function love.load()
 end
 
 function love.update(dt)
-    nm.pos:set(lm.getPosition())
+    nm.pos:set(nv(lm.getPosition()) / nc.video.scale)
+    nm.world:set(nm.pos + na.origin)
     nx.refresh()
     nl.update(dt)
     ne.update(dt)
+    na.update(dt)
     ni:update()
 end
 
