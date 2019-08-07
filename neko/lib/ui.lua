@@ -52,7 +52,8 @@ local function node(tag, props, body)
     local str = props
     local props = {status = 1}
     for k in gmatch(str, "(%a+):") do
-        props[k] = gsub(match(str, k .. ":([^:]+)"), "%s+%a+$", "")
+        local v = gsub(match(str, k .. ":([^:]+)"), "%s+%a+$", "")
+        props[k] = tonumber(v) or v
     end
     return setmetatable({
         tag = tag,
@@ -140,7 +141,12 @@ function ui.draw()
             pos:set(min(max(pos.x, 0), edge.x), min(max(pos.y, 0), edge.y))
         end
         pos:set(nv(root.pos) + pos)
-        lg.setColor("#6a6a6a")
+        if nm.pos > pos and nm.pos < pos + box then
+            node.bg = "#ff0000"
+        else
+            node.bg = "#6a6a6a"
+        end
+        lg.setColor(node.bg)
         lg.rectangle("fill", pos.x, pos.y, node.box:unpack())
         lg.setColor()
         draw[node.tag](node)

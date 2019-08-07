@@ -4,7 +4,7 @@ local ns = neko.state
 local nl = neko.lerp
 local ne = neko.ecs
 local ni = neko.input
-local nv = neko.video
+local nd = neko.video
 local nx = neko.axis
 local nr = neko.run
 local nm = neko.mouse
@@ -32,5 +32,5 @@ function love.update(dt)
 end
 
 function love.resize(w, h)
-    nv.resize(w, h)
+    nd.resize(w, h)
 end

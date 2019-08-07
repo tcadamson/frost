@@ -18,6 +18,10 @@ local grow = 2
 local decay = 0.99
 local target
 
+local function check(vec)
+    return vec.x < 0 or vec.y < 0
+end
+
 function camera.focus(e)
     if not target then camera.pos:set(ne.pos[e]) end
     target = e
@@ -26,7 +30,7 @@ end
 function camera.culled(pos, tex)
     local shift = nv(tex.sx, tex.sy)
     local net = nv(pos) - camera.origin
-    return (shift + net) < 0 or (shift - net + nd.box) < 0
+    return check(shift + net) or check(shift - net + nd.box)
 end
 
 function camera.shake()

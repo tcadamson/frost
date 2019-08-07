@@ -1,10 +1,7 @@
 local type = type
-local select = select
-local rawset = rawset
 local format = string.format
 local match = string.match
 local lf = love.filesystem
-local lw = love.window
 local util = {}
 
 function util.t_out(t)

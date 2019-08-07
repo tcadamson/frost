@@ -40,7 +40,10 @@ local meta = {
         return a.x == b.x and a.y == b.y
     end,
     __lt = function(a, b)
-        return a.x < b or a.y < b
+        return a.x < b.x and a.y < b.y
+    end,
+    __gt = function(a, b)
+        return a.x > b.x and a.y > b.y
     end
 }
 
