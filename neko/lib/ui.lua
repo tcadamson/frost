@@ -12,6 +12,7 @@ local lg = love.graphics
 local nv = neko.vector
 local nm = neko.mouse
 local text = {}
+local style = {}
 local ui = {
     box = nv(),
     pos = nv()
@@ -47,14 +48,19 @@ local function iter(level, call, rev)
     end
 end
 
-local function node(tag, props, body)
-    -- props can exist locally or be inherited
-    local str = props
+local function process(str)
+    -- TODO: exclude status in style props
     local props = {status = 1}
     for k in gmatch(str, "(%a+):") do
-        local v = gsub(match(str, k .. ":([^:]+)"), "%s+%a+$", "")
+        local v = gsub(match(str, k .. ":([^%c:]+)"), "%s+%a+$", "")
         props[k] = tonumber(v) or v
     end
+    return props
+end
+
+local function node(tag, props, body)
+    -- props can exist locally or be inherited
+    local props = process(props)
     return setmetatable({
         tag = tag,
         body = body,
@@ -97,10 +103,31 @@ function ui.load(def)
     end
 end
 
+function ui.style(def)
+    for target, body in gmatch(def, "([%%%w]+)%s*{([^}]*)") do
+        local out = process(body)
+        -- TODO: justify prefixing classes with %
+        -- identify class using target, class = gsub(target, "%%", "")
+        target = gsub(target, "%%", "")
+        for act, body in gmatch(body, "%%(%a+)(.-)%%") do
+            out[act] = process(body)
+        end
+        style[target] = out
+    end
+    iter(ui, function(node)
+        local class = node.class
+        if class then
+            setmetatable(style[class], {
+                __index = style[node.tag]
+            })
+        end
+    end)
+end
+
 function ui.draw()
     iter(ui, function(node)
         local body = node.body
-        local dir = node.dir or "y"
+        local dir = style[node.class or node.tag].dir or "y"
         local box = nv()
         local pos = nv()
         if body then
@@ -131,8 +158,10 @@ function ui.draw()
     iter(ui, function(node)
         local box = node.box
         local pos = node.pos
-        local pin = node.pin
         local root = node.root
+        local style = style[node.class or node.tag]
+        local bg = style.bg
+        local pin = style.pin
         if pin then
             local anchor, x, y = match(pin, "(c-)%((.+),%s*(.+)%)")
             local shift = nv(#anchor > 0 and box / 2)
@@ -142,12 +171,11 @@ function ui.draw()
         end
         pos:set(nv(root.pos) + pos)
         if nm.pos > pos and nm.pos < pos + box then
-            node.bg = "#ff0000"
-        else
-            node.bg = "#6a6a6a"
+            local hover = style.hover
+            if hover then bg = hover.bg end
         end
-        lg.setColor(node.bg)
-        lg.rectangle("fill", pos.x, pos.y, node.box:unpack())
+        lg.setColor(bg)
+        lg.rectangle("fill", pos.x, pos.y, box:unpack())
         lg.setColor()
         draw[node.tag](node)
     end)

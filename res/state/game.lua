@@ -10,7 +10,6 @@ local nv = neko.vector
 local nm = neko.mouse
 local nr = neko.run
 local nx = neko.axis
-local nt = neko.stats
 local nu = neko.ui
 local game = {}
 local tests = 999
@@ -43,7 +42,7 @@ function game:enter()
     nu.load([[
         <text>
             [ui test]
-            <text dir:x>
+            <text class:c1>
                 %stats.fetch
                 <text>
                     top
@@ -51,7 +50,21 @@ function game:enter()
                 </text>
             </text>
         </text>
-        <text pin:c(0, 0.5)>under</text>
+        <text class:c2>under</text>
+    ]])
+    nu.style([[
+        text {
+            bg:#6a6a6a
+            %hover
+                bg:#ff0000
+            %hover
+        }
+        %c1 {
+            dir:x
+        }
+        %c2 {
+            pin:c(0,0.5)
+        }
     ]])
 end
 
@@ -89,7 +102,6 @@ function game:draw()
         end
     end
     lg.pop()
-    -- nt.draw()
     nu.draw()
     nd.pop()
 end
