@@ -50,7 +50,7 @@ function game:enter()
                 </text>
             </text>
         </text>
-        <text class:c2>under</text>
+        <text pin:c(0,0.5)>under</text>
     ]])
     nu.style([[
         text {
@@ -58,12 +58,13 @@ function game:enter()
             %hover
                 bg:#ff0000
             %hover
+            %click
+                color:#000000
+                bg:#ffffff
+            %click
         }
         %c1 {
             dir:x
-        }
-        %c2 {
-            pin:c(0,0.5)
         }
     ]])
 end

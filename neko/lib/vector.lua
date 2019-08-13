@@ -8,12 +8,6 @@ local format = string.format
 local nm = neko.mem
 local ffi = require("ffi")
 local vec = {}
-local buf = nm.new([[
-    typedef struct {
-        double x, y;
-    } vec
-]])
-
 local meta = {
     __index = vec,
     __tostring = function(v)
@@ -46,6 +40,11 @@ local meta = {
         return a.x > b.x and a.y > b.y
     end
 }
+local buf = nm.new([[
+    typedef struct {
+        double x, y;
+    } vec
+]])
 
 function vec:len()
     return sqrt(self.x * self.x + self.y * self.y)

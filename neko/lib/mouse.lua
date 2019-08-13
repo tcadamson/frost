@@ -17,4 +17,12 @@ function mouse.init()
     lm.setCursor(lm.newCursor(canvas:newImageData()))
 end
 
+function love.mousepressed(x, y, button)
+    mouse.down = button
+end
+
+function love.mousereleased(x, y, button)
+    mouse.down = nil
+end
+
 return mouse
