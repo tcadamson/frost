@@ -189,7 +189,7 @@ function ui.draw()
             if nm.pos > pos and nm.pos < pos + box then
                 color = style.hover.color
                 bg = style.hover.bg
-                if nm.down == 1 then
+                if nm.m1.down then
                     color = style.click.color
                     bg = style.click.bg
                 end
