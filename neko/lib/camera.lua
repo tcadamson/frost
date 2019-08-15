@@ -4,7 +4,6 @@ local pi = math.pi
 local ne = neko.ecs
 local nv = neko.vector
 local nd = neko.video
-local nc = neko.config
 local camera = {
     pos = nv(),
     origin = nv(),
