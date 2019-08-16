@@ -14,7 +14,7 @@ local cdef = {
     pos = "double x, y",
     phys = "double v",
     steer = "double x, y",
-    target = "uint16_t e",
+    target = "uint16_t e, radius",
     tex = "const char *file, *hash; uint16_t x, y, w, h, sx, sy"
 }
 local uid = 0
@@ -51,13 +51,22 @@ end
 function ecs.new(data, override)
     local e = remove(dead) or uid
     uid = uid + 1
-    if type(data) == "string" then data = require("res/ecs/" .. data) end
-    for k, v in pairs(data) do
-        if type(k) == "number" then
-            k = v
-            v = {}
+    if data then
+        if type(data) == "string" then data = require("res/ecs/" .. data) end
+        for k, v in pairs(data) do
+            if type(k) == "number" then
+                k = v
+                v = {}
+            end
+            ecs[k][e] = v
         end
-        ecs[k][e] = override and override[k] or v
+        if override then
+            for k, v in pairs(override) do
+                for field, new in pairs(v) do
+                    ecs[k][e][field] = new
+                end
+            end
+        end
     end
     return e
 end
@@ -72,6 +81,14 @@ end
 function ecs.toggle(e, id)
     local struct = com[id]:get(e)
     struct.status = struct.status > 0 and 0 or 1
+end
+
+function ecs.on(e, id)
+    com[id]:get(e).status = 1
+end
+
+function ecs.off(e, id)
+    com[id]:get(e).status = 0
 end
 
 function ecs.update(dt)
