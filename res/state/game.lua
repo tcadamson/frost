@@ -34,13 +34,10 @@ function game:enter()
             x = 0,
             y = 200
         },
-        target = {
-            status = 0,
-            e = ne.new()
-        }
+        target = {status = 0}
     })
     m1 = ne.new("m1", {
-        target = {e = p1}
+        target = {uid = p1}
     })
     na.focus(p1)
     nu.load([[
@@ -74,16 +71,15 @@ function game:enter()
 end
 
 function game:update(dt)
-    local dir = nv(ni:get("move"))
     local steer = ne.steer[p1]
-    local target = ne.pos[ne.target[p1].e]
-    if dir:len() > 0 then
+    local target = ne.target[p1]
+    steer.x, steer.y = ni:get("move")
+    if nv(steer):len() > 0 then
         ne.off(p1, "target")
     elseif nm.m1.pressed then
         ne.on(p1, "target")
         target.x, target.y = nm.world:unpack()
     end
-    steer.x, steer.y = dir:unpack()
     for i = 0, tests do
         local j = i + 1
         local scale = 10

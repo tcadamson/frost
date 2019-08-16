@@ -1,6 +1,7 @@
 local type = type
 local tonumber = tonumber
 local format = string.format
+local match = string.match
 local gmatch = string.gmatch
 local gsub = string.gsub
 local remove = table.remove
@@ -14,8 +15,8 @@ local cdef = {
     pos = "double x, y",
     phys = "double v",
     steer = "double x, y",
-    target = "uint16_t e, radius",
-    tex = "const char *file, *hash; uint16_t x, y, w, h, sx, sy"
+    target = "double x, y; int uid, radius",
+    tex = "const char *file, *hash; int x, y, w, h, sx, sy"
 }
 local uid = 0
 
@@ -59,6 +60,9 @@ function ecs.new(data, override)
                 v = {}
             end
             ecs[k][e] = v
+            -- components with a uid field must have inaccessible default
+            -- -1 is suitable since uid >= 0
+            if match(cdef[k], "%suid[^%a]") then ecs[k][e].uid = -1 end
         end
         if override then
             for k, v in pairs(override) do
