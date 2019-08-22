@@ -77,8 +77,10 @@ function game:update(dt)
     if nv(steer):len() > 0 then
         ne.off(p1, "target")
     elseif nm.m1.pressed then
-        ne.on(p1, "target")
-        target.x, target.y = nm.world:unpack()
+        nm.queue(function()
+            ne.on(p1, "target")
+            target.x, target.y = nm.world:unpack()
+        end)
     end
     for i = 0, tests do
         local j = i + 1

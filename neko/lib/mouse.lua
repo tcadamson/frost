@@ -4,16 +4,19 @@ local nc = neko.config
 local nv = neko.vector
 local nd = neko.video
 local na = neko.camera
-local mouse = setmetatable({
-    pos = nv(),
-    world = nv(),
-    wheel = nv()
-}, {
+local meta = {
     __index = function(t, k)
         t[k] = {}
         return t[k]
     end
-})
+}
+local queue = setmetatable({}, meta)
+local mouse = setmetatable({
+    pos = nv(),
+    world = nv(),
+    wheel = nv()
+}, meta)
+local space = queue.world
 local buttons = 3
 
 function mouse.init()
@@ -27,7 +30,9 @@ end
 
 function mouse.update(dt)
     local pos = mouse.pos
+    local call = space[#space]
     pos:set(nv(lm.getPosition()) / nc.video.scale)
+    mouse.space("world")
     mouse.world:set(pos + na.origin)
     for i = 1, buttons do
         local b = mouse["m" .. i]
@@ -36,6 +41,18 @@ function mouse.update(dt)
         b.released = not down and b.down
         b.down = down
     end
+    if call then call() end
+end
+
+function mouse.queue(f)
+    space[#space + 1] = f
+end
+
+function mouse.space(to)
+    for i = 1, #space do
+        space[i] = nil
+    end
+    space = queue[to]
 end
 
 function love.wheelmoved(x, y)

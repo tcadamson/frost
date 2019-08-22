@@ -8,6 +8,7 @@ local nx = neko.axis
 local nr = neko.run
 local nm = neko.mouse
 local na = neko.camera
+local nu = neko.ui
 
 function love.load()
     ns:hook()
@@ -20,6 +21,7 @@ end
 
 function love.update(dt)
     nx.refresh()
+    nu.update(dt)
     nm.update(dt)
     nl.update(dt)
     ne.update(dt)

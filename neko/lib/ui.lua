@@ -113,8 +113,10 @@ function ui.style(def)
         -- TODO: justify prefixing classes with %
         -- identify class using target, class = gsub(target, "%%", "")
         local out = {}
-        for k, v in pairs(calls) do
-            out[v] = {}
+        for i = 1, #calls do
+            out[calls[i]] = setmetatable({}, {
+                __index = out
+            })
         end
         for call, override in gmatch(body, "%%(%a+)(.-)%%") do
             body = gsub(body, call .. ".-%%", "")
@@ -129,16 +131,17 @@ function ui.style(def)
             setmetatable(base, {
                 __index = root
             })
-            for k, v in pairs(calls) do
-                setmetatable(base[v], {
-                    __index = root[v]
+            for i = 1, #calls do
+                local call = calls[i]
+                setmetatable(base[call], {
+                    __index = root[call]
                 })
             end
         end
     end)
 end
 
-function ui.draw()
+function ui.update(dt)
     iter(ui, function(node)
         local body = node.body
         local dir = style[node].dir or "y"
@@ -174,7 +177,6 @@ function ui.draw()
         local pos = node.pos
         local pin = node.pin
         local root = node.root
-        local style = style[node]
         if pin then
             local anchor, x, y = match(pin, "(c-)%((.+),%s*(.+)%)")
             local shift = nv(#anchor > 0 and box / 2)
@@ -183,20 +185,27 @@ function ui.draw()
             pos:set(min(max(pos.x, 0), edge.x), min(max(pos.y, 0), edge.y))
         end
         pos:set(root.pos + pos)
+        node.hover = nm.pos > pos and nm.pos < pos + box
+        if node.hover then
+            nm.space("ui")
+            nm.queue(function()
+                if nm.m1.released then print(text[node]) end
+            end)
+        end
+    end)
+end
+
+function ui.draw()
+    iter(ui, function(node)
+        local box = node.box
+        local pos = node.pos
+        local index = node.hover and (nm.m1.down and "click" or "hover")
+        local style = style[node]
         if style then
-            local color = style.color
-            local bg = style.bg
-            if nm.pos > pos and nm.pos < pos + box then
-                color = style.hover.color
-                bg = style.hover.bg
-                if nm.m1.down then
-                    color = style.click.color
-                    bg = style.click.bg
-                end
-            end
-            lg.setColor(bg)
+            if index then style = style[index] end
+            lg.setColor(style.bg)
             lg.rectangle("fill", pos.x, pos.y, box:unpack())
-            lg.setColor(color)
+            lg.setColor(style.color)
         end
         draw[node.tag](node)
     end)
