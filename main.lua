@@ -1,4 +1,5 @@
 require("neko.init")
+local le = love.event
 local ns = neko.state
 local nl = neko.lerp
 local ne = neko.ecs
@@ -24,7 +25,7 @@ function love.load()
                 </text>
             </text>
         </text>
-        <text pin:c(0,0.5)>under</text>
+        <text pin:c(0,0.5) click:quit>quit</text>
     ]])
     nu.style([[
         text {
@@ -41,6 +42,12 @@ function love.load()
             dir:x
         }
     ]])
+    nu.bind({
+        quit = function(node)
+            print(node.text)
+            le.quit()
+        end
+    })
     -- TODO: more sophisticated heuristic
     nr.loaded = true
     -- enable console output

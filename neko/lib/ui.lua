@@ -11,7 +11,6 @@ local remove = table.remove
 local lg = love.graphics
 local nv = neko.vector
 local nm = neko.mouse
-local text = {}
 local style = setmetatable({}, {
     __index = function(t, k)
         return t[k.class or k.tag]
@@ -19,7 +18,7 @@ local style = setmetatable({}, {
 })
 local draw = setmetatable({
     text = function(node)
-        lg.print(text[node], node.pos:unpack())
+        lg.print(node.text, node.pos:unpack())
     end
 }, {
     __index = function(t, k)
@@ -141,6 +140,12 @@ function ui.style(def)
     end)
 end
 
+function ui.bind(fs)
+    setmetatable(ui, {
+        __index = fs
+    })
+end
+
 function ui.update(dt)
     iter(ui, function(node)
         local body = node.body
@@ -156,7 +161,7 @@ function ui.update(dt)
                 if type(zone) == "function" then zone = zone() end
                 body = gsub(body, format("%%%%%s", token), zone)
             end
-            text[node] = body
+            node.text = body
             box:set(font:getWidth(body), font:getHeight(body))
         end
         for i = 1, #node do
@@ -189,7 +194,8 @@ function ui.update(dt)
         if node.hover then
             nm.space("ui")
             nm.queue(function()
-                if nm.m1.released then print(text[node]) end
+                local call = ui[node.click]
+                if call and nm.m1.released then call(node) end
             end)
         end
     end)
