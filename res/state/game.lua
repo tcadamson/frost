@@ -10,7 +10,6 @@ local nv = neko.vector
 local nm = neko.mouse
 local nr = neko.run
 local nx = neko.axis
-local nu = neko.ui
 local game = {}
 local tests = 999
 local p1
@@ -23,6 +22,23 @@ local function field(x, y)
     lg.setColor("#dfdfdf")
     lg.polygon("fill", x - r, y, x, y - r, x + r, y, x, y + r)
     lg.setColor()
+end
+
+local function draw()
+    lg.push()
+    lg.translate((na.shift - na.origin):unpack())
+    field()
+    nx.draw()
+    if ni:down("focus") then
+        local mob = nv(ne.pos[m1])
+        local delta = mob - nm.world
+        local step = 10
+        for i = 0, floor(delta:len() / step) do
+            local pos = nm.world + delta:norm() * i * step
+            lg.circle("fill", pos.x, pos.y, 2)
+        end
+    end
+    lg.pop()
 end
 
 function game:enter()
@@ -40,34 +56,6 @@ function game:enter()
         target = {uid = p1}
     })
     na.focus(p1)
-    nu.load([[
-        <text>
-            [ui test]
-            <text class:c1>
-                %stats.fetch
-                <text>
-                    top
-                    <text>bottom</text>
-                </text>
-            </text>
-        </text>
-        <text pin:c(0,0.5)>under</text>
-    ]])
-    nu.style([[
-        text {
-            bg:#6a6a6a
-            %hover
-                bg:#ff0000
-            %hover
-            %click
-                color:#000000
-                bg:#ffffff
-            %click
-        }
-        %c1 {
-            dir:x
-        }
-    ]])
 end
 
 function game:update(dt)
@@ -98,23 +86,7 @@ function game:update(dt)
 end
 
 function game:draw()
-    nd.push()
-    lg.push()
-    lg.translate((na.shift - na.origin):unpack())
-    field()
-    nx.draw()
-    if ni:down("focus") then
-        local mob = nv(ne.pos[m1])
-        local delta = mob - nm.world
-        local step = 10
-        for i = 0, floor(delta:len() / step) do
-            local pos = nm.world + delta:norm() * i * step
-            lg.circle("fill", pos.x, pos.y, 2)
-        end
-    end
-    lg.pop()
-    nu.draw()
-    nd.pop()
+    nd.draw(draw)
 end
 
 return game

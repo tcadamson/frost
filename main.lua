@@ -13,6 +13,34 @@ local nu = neko.ui
 function love.load()
     ns:hook()
     ns:switch("game")
+    nu.load([[
+        <text>
+            [ui test]
+            <text class:c1>
+                %stats.fetch
+                <text>
+                    top
+                    <text>bottom</text>
+                </text>
+            </text>
+        </text>
+        <text pin:c(0,0.5)>under</text>
+    ]])
+    nu.style([[
+        text {
+            bg:#6a6a6a
+            %hover
+                bg:#ff0000
+            %hover
+            %click
+                color:#000000
+                bg:#ffffff
+            %click
+        }
+        %c1 {
+            dir:x
+        }
+    ]])
     -- TODO: more sophisticated heuristic
     nr.loaded = true
     -- enable console output

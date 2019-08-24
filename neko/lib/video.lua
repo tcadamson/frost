@@ -67,17 +67,16 @@ function video.resize(w, h)
     neko.ui.box:set(box)
 end
 
-function video.push()
+function video.draw(draw)
     lg.setCanvas(canvas)
     lg.clear()
-    lg.setBlendMode("alpha")
-end
-
-function video.pop()
+    if draw then draw() end
+    neko.ui.draw()
     lg.setCanvas()
     lg.setColor()
     lg.setBlendMode("alpha", "premultiplied")
     lg.draw(canvas, 0, 0, 0, nc.video.scale, nc.video.scale)
+    lg.setBlendMode("alpha")
 end
 
 return video
