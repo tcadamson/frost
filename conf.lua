@@ -96,13 +96,15 @@ function love.conf(t)
         __index = {
             init = function()
                 local lw = love.window
+                local lr = love.resize
                 local flags = sync(lw.getMode())
                 if flags then
                     lw.setMode(nc.video.width, nc.video.height, flags)
                     -- lw.setMode doesn't trigger the resize call
-                    love.resize(lw.getMode())
-                    neko.run.framerate = nc.video.fps > 0 and nc.video.fps
+                    -- lr not available in fullscreen
+                    if lr then lr(lw.getMode()) end
                 end
+                neko.run.framerate = nc.video.fps > 0 and nc.video.fps
             end,
             save = function()
                 lf.write(path, tostring(nc))
