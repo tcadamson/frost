@@ -193,6 +193,7 @@ function ui.update(dt)
             end)
         end
     end)
+    nm.space()
 end
 
 function ui.draw()

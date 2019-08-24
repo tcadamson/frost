@@ -21,8 +21,8 @@ end
 
 function love.update(dt)
     nx.refresh()
-    nu.update(dt)
     nm.update(dt)
+    nu.update(dt)
     nl.update(dt)
     ne.update(dt)
     na.update(dt)
