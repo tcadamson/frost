@@ -3,19 +3,32 @@ local format = string.format
 local match = string.match
 local lf = love.filesystem
 local util = {}
+local meta = {
+    grow = {
+        __index = function(t, k)
+            t[k] = {}
+            return t[k]
+        end
+    }
+}
 
-function util.t_out(t)
+function util.out(t)
     for k, v in pairs(t) do
         print(format("k: %s v: %s", k, v))
     end
 end
 
-function util.t_copy(t)
-    local out = {}
-    for k, v in pairs(t) do
-        out[k] = type(v) == "table" and util.t_copy(v) or v
-    end
-    return out
+function util.new(mt, t)
+    return setmetatable(t or {}, meta[mt])
+end
+
+function util.memoize(f)
+    return setmetatable({}, {
+        __index = function(t, k)
+            t[k] = f(k)
+            return t[k]
+        end
+    })
 end
 
 function util.crawl(dir, call, filter)
@@ -32,13 +45,10 @@ function util.crawl(dir, call, filter)
     end
 end
 
-function util.memoize(f)
-    return setmetatable({}, {
-        __index = function(t, k)
-            t[k] = f(k)
-            return t[k]
-        end
-    })
+function util.poll(down, t)
+    t.pressed = not t.down and down
+    t.released = not down and t.down
+    t.down = down
 end
 
 return util

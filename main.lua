@@ -57,11 +57,11 @@ end
 function love.update(dt)
     nx.refresh()
     nm.update(dt)
+    ni.update(dt)
     nu.update(dt)
     nl.update(dt)
     ne.update(dt)
     na.update(dt)
-    ni:update()
 end
 
 function love.resize(w, h)

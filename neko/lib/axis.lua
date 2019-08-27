@@ -1,11 +1,7 @@
 local unpack = unpack
+local nu = neko.util
 local axis = {}
-local q = setmetatable({}, {
-    __index = function(t, k)
-        t[k] = {}
-        return t[k]
-    end
-})
+local q = nu.new("grow")
 local min = 1
 local max = 1
 

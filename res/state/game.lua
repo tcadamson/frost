@@ -29,7 +29,7 @@ local function draw()
     lg.translate((na.shift - na.origin):unpack())
     field()
     nx.draw()
-    if ni:down("focus") then
+    if ni.focus.down then
         local mob = nv(ne.pos[m1])
         local delta = mob - nm.world
         local step = 10
@@ -61,7 +61,7 @@ end
 function game:update(dt)
     local steer = ne.steer[p1]
     local target = ne.target[p1]
-    steer.x, steer.y = ni:get("move")
+    steer.x, steer.y = ni.move:unpack()
     if nv(steer):len() > 0 then
         ne.off(p1, "target")
     elseif nm.m1.pressed then
@@ -78,11 +78,11 @@ function game:update(dt)
         ne.pos[i].x = j * scale
         ne.pos[i].y = sin(nr.tick * speed - j) * scale + shift
     end
-    if ni:pressed("act") then
+    if ni.act.pressed then
         na.shake()
         ne.toggle(m1, "steer")
     end
-    if ni:pressed("quit") then le.quit() end
+    if ni.quit.pressed then le.quit() end
 end
 
 function game:draw()
