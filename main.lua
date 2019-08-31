@@ -30,12 +30,15 @@ function love.load()
     nu.style([[
         text {
             bg:#6a6a6a
+            pad:0
             %hover
                 bg:#ff0000
+                pad:10
             %hover
             %click
                 color:#000000
                 bg:#ffffff
+                pad:10
             %click
         }
         %c1 {
