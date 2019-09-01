@@ -14,29 +14,31 @@ local lg = love.graphics
 local nv = neko.vector
 local nm = neko.mouse
 local style = setmetatable({}, {
-    __index = function(t, k)
-        if k then
-            -- k.box and k.pos are nil on first update
-            local box = nv(k.box)
-            local pos = nv(k.pos)
-            k.hovered = nm.pos > pos and nm.pos < pos + box
-            k.clicked = nm.m1.down and k.hovered
-            t = t[k.class or k.tag]
-            return t[k.hovered and (k.clicked and "click" or "hover")] or t
-        end
+    __index = function(style, node)
+        local class = rawget(style, node.class)
+        local tag = rawget(style, node.tag)
+        local out = setmetatable({}, {
+            __index = function(t, k)
+                local box = node.box
+                local pos = node.pos
+                node.hovered = nm.pos > pos and nm.pos < pos + box
+                if class or tag then
+                    local id = node.hovered and (nm.m1.down and "click" or "hover")
+                    return class and class[id][k] or tag and tag[id][k]
+                end
+            end
+        })
+        style[node] = out
+        return out
     end
 })
-local draw = setmetatable({
+local draw = {
     text = function(node, style)
         local pad = style.pad
         local pos = node.pos + nv(pad, pad)
         lg.print(node.text, pos:unpack())
     end
-}, {
-    __index = function(t, k)
-        error(k .. ": not drawable")
-    end
-})
+}
 local ui = {
     box = nv(),
     pos = nv()
@@ -65,7 +67,11 @@ local function iter(level, call, dir)
 end
 
 local function process(str, props)
-    props = props or {status = 1}
+    props = props or {
+        status = 1,
+        box = nv(),
+        pos = nv()
+    }
     for k in gmatch(str, "(%a+):") do
         local v = gsub(match(str, k .. ":([^%c:]+)"), "%s+%a+$", "")
         props[k] = tonumber(v) or v
@@ -127,25 +133,13 @@ function ui.style(def)
             body = gsub(body, call .. ".-%%", "")
             out[call] = process(override, out[call])
         end
-        style[gsub(target, "%%", "")] = process(body, out)
-    end
-    iter(ui, function(node)
-        local class = style[node.class]
-        local tag = style[node.tag]
-        if class and tag then
-            setmetatable(class, {
-                __index = tag
-            })
-            for i = 1, #calls do
-                local call = calls[i]
-                setmetatable(class[call], {
-                    __index = function(t, k)
-                        return rawget(tag[call], k) or class[k]
-                    end
-                })
+        style[gsub(target, "%%", "")] = setmetatable(process(body, out), {
+            __index = function(t, k)
+                -- index by state test and return root table if it fails
+                return not k and t
             end
-        end
-    end)
+        })
+    end
 end
 
 function ui.bind(fs)
@@ -160,6 +154,7 @@ function ui.update(dt)
         local style = style[node]
         local dir = style.dir or "y"
         local pad = style.pad
+        local margin = style.margin
         local box = nv()
         local pos = nv()
         if body then
@@ -173,17 +168,20 @@ function ui.update(dt)
             end
             node.text = body
             box:set(font:getWidth(body), font:getHeight(body))
-            box:set(box + nv(pad, pad) * 2)
         end
+        box:set(box + nv(pad, pad) * 2)
         iter(node, function(node)
             local temp = node.box
-            node.pos[dir] = box[dir]
+            local pos = node.pos
+            pos[dir] = box[dir]
+            pos:set(pos + nv(margin, margin))
             if dir == "y" then
                 box:set(max(box.x, temp.x), box.y + temp.y)
             else
                 box:set(box.x + temp.x, max(box.y, temp.y))
             end
         end, 1)
+        box:set(box + nv(margin, margin) * 2)
         node.box = box
         node.pos = pos
     end, -huge)
@@ -215,13 +213,15 @@ function ui.draw()
     iter(ui, function(node)
         local box = node.box
         local pos = node.pos
+        local draw = draw[node.tag]
         local style = style[node]
-        if style then
-            lg.setColor(style.bg)
+        local bg = style.bg
+        if bg then
+            lg.setColor(bg)
             lg.rectangle("fill", pos.x, pos.y, box:unpack())
             lg.setColor(style.color)
         end
-        draw[node.tag](node, style)
+        return draw and draw(node, style)
     end)
 end
 
