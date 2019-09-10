@@ -13,32 +13,37 @@ local remove = table.remove
 local lg = love.graphics
 local nv = neko.vector
 local nm = neko.mouse
-local style = setmetatable({}, {
-    __index = function(style, node)
-        local class = rawget(style, node.class)
-        local tag = rawget(style, node.tag)
+local styles = setmetatable({
+    dir = "y"
+}, {
+    __index = function(styles, node)
+        local class = rawget(styles, node.class)
+        local tag = rawget(styles, node.tag)
         local out = setmetatable({}, {
             __index = function(t, k)
-                local box = node.box
-                local pos = node.pos
-                node.hovered = nm.pos > pos and nm.pos < pos + box
-                if class or tag then
-                    local id = node.hovered and (nm.m1.down and "click" or "hover")
-                    return class and class[id][k] or tag and tag[id][k]
-                end
+                local id = node.hovered and (nm.m1.down and "click" or "hover")
+                return class and class[id][k] or tag and tag[id][k] or rawget(styles, k)
             end
         })
-        style[node] = out
+        styles[node] = out
         return out
     end
 })
-local draw = {
+local body = setmetatable({}, {
+    __index = function(t, k)
+        t[k] = k.body
+    end
+})
+local draw = setmetatable({
     text = function(node, style)
         local pad = style.pad
-        local pos = node.pos + nv(pad, pad)
-        lg.print(node.text, pos:unpack())
+        lg.print(node.body, (node.pos + nv(pad, pad)):unpack())
     end
-}
+}, {
+    __index = function(t, k)
+        return rawget(t, k.tag)
+    end
+})
 local ui = {
     box = nv(),
     pos = nv()
@@ -81,7 +86,7 @@ end
 
 local function node(tag, props, body)
     local props = process(props)
-    return setmetatable({
+    local node = setmetatable({
         tag = tag,
         body = body,
         props = props,
@@ -93,6 +98,7 @@ local function node(tag, props, body)
             rawset(t, k, v)
         end
     })
+    return node
 end
 
 function ui.load(def)
@@ -133,7 +139,7 @@ function ui.style(def)
             body = gsub(body, call .. ".-%%", "")
             out[call] = process(override, out[call])
         end
-        style[gsub(target, "%%", "")] = setmetatable(process(body, out), {
+        styles[gsub(target, "%%", "")] = setmetatable(process(body, out), {
             __index = function(t, k)
                 -- index by state test and return root table if it fails
                 return not k and t
@@ -150,38 +156,40 @@ end
 
 function ui.update(dt)
     iter(ui, function(node)
-        local body = node.body
-        local style = style[node]
-        local dir = style.dir or "y"
+        local box = node.box
+        local pos = node.pos
+        node.hovered = nm.pos > pos and nm.pos < pos + box
+    end)
+    iter(ui, function(node)
+        local body = body[node]
+        local style = styles[node]
+        local dir = style.dir
         local pad = style.pad
         local margin = style.margin
         local box = nv()
-        local pos = nv()
+        local pos = nv(margin, margin)
         if body then
             for token in gmatch(body, "%%([^%s]+)") do
                 local zone = neko
                 for sub in gmatch(token, "%w+") do
                     zone = zone[sub]
                 end
-                if type(zone) == "function" then zone = zone() end
-                body = gsub(body, format("%%%%%s", token), zone)
+                body = gsub(body, format("%%%%%s", token), type(zone) == "function" and zone() or zone)
             end
-            node.text = body
+            node.body = body
             box:set(font:getWidth(body), font:getHeight(body))
         end
         box:set(box + nv(pad, pad) * 2)
         iter(node, function(node)
-            local temp = node.box
-            local pos = node.pos
-            pos[dir] = box[dir]
-            pos:set(pos + nv(margin, margin))
+            local margin = styles[node].margin
+            local sub = node.box + nv(margin, margin) * 2
+            node.pos[dir] = box[dir] + margin
             if dir == "y" then
-                box:set(max(box.x, temp.x), box.y + temp.y)
+                box:set(max(box.x, sub.x), box.y + sub.y)
             else
-                box:set(box.x + temp.x, max(box.y, temp.y))
+                box:set(box.x + sub.x, max(box.y, sub.y))
             end
         end, 1)
-        box:set(box + nv(margin, margin) * 2)
         node.box = box
         node.pos = pos
     end, -huge)
@@ -191,15 +199,15 @@ function ui.update(dt)
         local pin = node.pin
         local root = node.root
         if pin then
+            local margin = styles[node].margin
             local anchor, x, y = match(pin, "(c-)%((.+),%s*(.+)%)")
-            local shift = nv(#anchor > 0 and box / 2)
-            local edge = root.box - box
-            pos:set(nv(x * root.box.x, y * root.box.y) - shift)
-            pos:set(min(max(pos.x, 0), edge.x), min(max(pos.y, 0), edge.y))
+            local edge = root.box - box - nv(margin, margin)
+            pos:set(nv(x * root.box.x, y * root.box.y) - nv(#anchor > 0 and box / 2))
+            pos:set(min(max(pos.x, margin), edge.x), min(max(pos.y, margin), edge.y))
         end
         pos:set(root.pos + pos)
         if node.hovered then
-            nm.space("ui")
+            if draw[node] then nm.space("ui") end
             nm.queue(function()
                 local call = ui[node.click]
                 if call and nm.m1.released then call(node) end
@@ -211,12 +219,12 @@ end
 
 function ui.draw()
     iter(ui, function(node)
-        local box = node.box
-        local pos = node.pos
-        local draw = draw[node.tag]
-        local style = style[node]
+        local draw = draw[node]
+        local style = styles[node]
         local bg = style.bg
         if bg then
+            local box = node.box
+            local pos = node.pos
             lg.setColor(bg)
             lg.rectangle("fill", pos.x, pos.y, box:unpack())
             lg.setColor(style.color)

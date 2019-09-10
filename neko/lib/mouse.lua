@@ -56,7 +56,7 @@ function mouse.queue(f)
 end
 
 function mouse.space(to)
-    space = to or "world"
+    space = to or order[#order]
 end
 
 function love.wheelmoved(x, y)
@@ -64,4 +64,5 @@ function love.wheelmoved(x, y)
     wheel:set(wheel + nv(x, y))
 end
 
+mouse.space()
 return mouse

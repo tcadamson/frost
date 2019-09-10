@@ -15,41 +15,41 @@ function love.load()
     ns:hook()
     ns:switch("game")
     nu.load([[
-        <box class:c1>
-            <text class:c2>
-                %stats.fetch
+        <box>
+            <text click:body>%stats.fetch</text>
+            <text class:c1>
+                test
                 <text>
                     top
                     <text>bottom</text>
                 </text>
             </text>
-            <text class:c2>test</text>
         </box>
-        <text pin:c(0,0.5) click:quit>quit</text>
+        <text pin:c(0,1) click:quit>quit</text>
     ]])
     nu.style([[
         text {
             bg:#6a6a6a
             pad:5
+            margin:5
             %hover
                 bg:#ff0000
             %hover
             %click
-                color:#000000
                 bg:#ffffff
+                color:#000000
             %click
         }
         %c1 {
-            margin:5
-        }
-        %c2 {
             dir:x
         }
     ]])
     nu.bind({
         quit = function(node)
-            print(node.text)
             le.quit()
+        end,
+        body = function(node)
+            print(node.body)
         end
     })
     -- TODO: more sophisticated heuristic
