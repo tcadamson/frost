@@ -2,6 +2,7 @@ local type = type
 local tonumber = tonumber
 local rawset = rawset
 local rawget = rawget
+local select = select
 local min = math.min
 local max = math.max
 local huge = math.huge
@@ -35,9 +36,9 @@ local body = setmetatable({}, {
     end
 })
 local draw = setmetatable({
-    text = function(node, style)
-        local pad = style.pad
-        lg.print(node.body, (node.pos + nv(pad, pad)):unpack())
+    text = function(node, style, dirs)
+        local pa = dirs(style.pad)
+        lg.print(node.body, (node.pos + pa):unpack())
     end
 }, {
     __index = function(t, k)
@@ -45,8 +46,8 @@ local draw = setmetatable({
     end
 })
 local ui = {
-    box = nv(),
-    pos = nv()
+    pos = nv(),
+    box = nv()
 }
 local calls = {
     "hover",
@@ -74,8 +75,8 @@ end
 local function process(str, props)
     props = props or {
         status = 1,
-        box = nv(),
-        pos = nv()
+        pos = nv(),
+        box = nv()
     }
     for k in gmatch(str, "(%a+):") do
         local v = gsub(match(str, k .. ":([^%c:]+)"), "%s+%a+$", "")
@@ -99,6 +100,27 @@ local function node(tag, props, body)
         end
     })
     return node
+end
+
+local function dirs(str)
+    str = str or 0
+    -- a corresponds to left, top
+    -- b corresponds to right, bottom
+    local a = nv()
+    local b = nv()
+    local i = 1
+    local query = "[%d.]+"
+    if not match(str, "%(.+%)") then str = format("(%d)", str) end
+    while select(2, gsub(str, query, "")) < 4 do
+        str = gsub(str, format("(%s)%%)", query), "%1,%1)")
+    end
+    for token in gmatch(str, query) do
+        local out = i <= 2 and a or b
+        local dir = i % 2 == 1 and "x" or "y"
+        out[dir] = tonumber(token)
+        i = i + 1
+    end
+    return a, b
 end
 
 function ui.load(def)
@@ -128,7 +150,6 @@ end
 function ui.style(def)
     for target, body in gmatch(def, "([%%%w]+)%s*{([^}]*)") do
         -- TODO: justify prefixing classes with %
-        -- identify class using target, class = gsub(target, "%%", "")
         local out = {}
         for i = 1, #calls do
             out[calls[i]] = setmetatable({}, {
@@ -156,18 +177,17 @@ end
 
 function ui.update(dt)
     iter(ui, function(node)
-        local box = node.box
         local pos = node.pos
+        local box = node.box
         node.hovered = nm.pos > pos and nm.pos < pos + box
     end)
     iter(ui, function(node)
         local body = body[node]
         local style = styles[node]
         local dir = style.dir
-        local pad = style.pad
-        local margin = style.margin
+        local pa, pb = dirs(style.pad)
+        local pos = dirs(style.margin)
         local box = nv()
-        local pos = nv(margin, margin)
         if body then
             for token in gmatch(body, "%%([^%s]+)") do
                 local zone = neko
@@ -179,31 +199,32 @@ function ui.update(dt)
             node.body = body
             box:set(font:getWidth(body), font:getHeight(body))
         end
-        box:set(box + nv(pad, pad) * 2)
+        box:set(box + pa + pb)
         iter(node, function(node)
-            local margin = styles[node].margin
-            local sub = node.box + nv(margin, margin) * 2
-            node.pos[dir] = box[dir] + margin
+            local ma, mb = dirs(styles[node].margin)
+            local sub = node.box + ma + mb
+            node.pos[dir] = box[dir] + ma[dir]
             if dir == "y" then
                 box:set(max(box.x, sub.x), box.y + sub.y)
             else
                 box:set(box.x + sub.x, max(box.y, sub.y))
             end
         end, 1)
-        node.box = box
         node.pos = pos
+        node.box = box
     end, -huge)
     iter(ui, function(node)
-        local box = node.box
         local pos = node.pos
+        local box = node.box
         local pin = node.pin
         local root = node.root
         if pin then
-            local margin = styles[node].margin
-            local anchor, x, y = match(pin, "(c-)%((.+),%s*(.+)%)")
-            local edge = root.box - box - nv(margin, margin)
-            pos:set(nv(x * root.box.x, y * root.box.y) - nv(#anchor > 0 and box / 2))
-            pos:set(min(max(pos.x, margin), edge.x), min(max(pos.y, margin), edge.y))
+            local ma, mb = dirs(styles[node].margin)
+            local shift = nv(match(pin, "(%a)%(") and box / 2)
+            local edge = root.box - box - mb
+            pin = dirs(pin)
+            pos:set(nv(pin.x * root.box.x, pin.y * root.box.y) - shift)
+            pos:set(min(max(pos.x, ma.x), edge.x), min(max(pos.y, ma.y), edge.y))
         end
         pos:set(root.pos + pos)
         if node.hovered then
@@ -223,13 +244,13 @@ function ui.draw()
         local style = styles[node]
         local bg = style.bg
         if bg then
-            local box = node.box
             local pos = node.pos
+            local box = node.box
             lg.setColor(bg)
             lg.rectangle("fill", pos.x, pos.y, box:unpack())
             lg.setColor(style.color)
         end
-        return draw and draw(node, style)
+        return draw and draw(node, style, dirs)
     end)
 end
 

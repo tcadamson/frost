@@ -41,6 +41,7 @@ function love.load()
             %click
         }
         %c1 {
+            margin:(5,0)
             dir:x
         }
     ]])
