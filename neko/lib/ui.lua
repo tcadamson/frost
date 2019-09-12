@@ -6,6 +6,7 @@ local select = select
 local min = math.min
 local max = math.max
 local huge = math.huge
+local ceil = math.ceil
 local format = string.format
 local match = string.match
 local gmatch = string.gmatch
@@ -14,15 +15,54 @@ local remove = table.remove
 local lg = love.graphics
 local nv = neko.vector
 local nm = neko.mouse
+local nu = neko.util
+local bundle = setmetatable({
+    dirs = function(t, k)
+        return nv(k and k[1]), nv(k and k[2])
+    end
+}, {
+    __index = function(t, k)
+        local body = tonumber(k) and k or match(k, "%((.+)%)")
+        local out = k
+        if body then
+            out = nu.new("grow")
+            out.arg = match(k, "^%a")
+            if not match(body, "%a") then
+                local query = "[%d.]+"
+                local i = 1
+                while select(2, gsub(body, query, "")) < 4 do
+                    body = gsub(body, format("(%s)$", query), "%1,%1")
+                end
+                for token in gmatch(body, query) do
+                    out[ceil(i / 2)][i % 2 == 1 and "x" or "y"] = tonumber(token)
+                    i = i + 1
+                end
+            else
+                for token in gmatch(k, "[(,](%w+)") do
+                    out[#out + 1] = token
+                end
+            end
+        end
+        t[k] = out
+        return out
+    end
+})
 local styles = setmetatable({
     dir = "y"
 }, {
     __index = function(styles, node)
-        local class = rawget(styles, node.class)
+        local id = node.class
+        local class = rawget(styles, id)
+        if not class and type(id) == "table" then
+            class = rawget(styles, remove(id, 1))
+            for i = 1, #id do
+                nu.merge(class, rawget(styles, id[i]))
+            end
+        end
         local tag = rawget(styles, node.tag)
         local out = setmetatable({}, {
             __index = function(t, k)
-                local id = node.hovered and (nm.m1.down and "click" or "hover")
+                id = node.hovered and (nm.m1.down and "click" or "hover")
                 return class and class[id][k] or tag and tag[id][k] or rawget(styles, k)
             end
         })
@@ -33,12 +73,13 @@ local styles = setmetatable({
 local body = setmetatable({}, {
     __index = function(t, k)
         t[k] = k.body
+        -- rawget to prevent fatal loop if body is nil
+        return rawget(t, k)
     end
 })
 local draw = setmetatable({
-    text = function(node, style, dirs)
-        local pa = dirs(style.pad)
-        lg.print(node.body, (node.pos + pa):unpack())
+    text = function(node, style)
+        lg.print(node.body, (node.pos + bundle:dirs(style.pad)):unpack())
     end
 }, {
     __index = function(t, k)
@@ -80,7 +121,7 @@ local function process(str, props)
     }
     for k in gmatch(str, "(%a+):") do
         local v = gsub(match(str, k .. ":([^%c:]+)"), "%s+%a+$", "")
-        props[k] = tonumber(v) or v
+        props[k] = bundle[v]
     end
     return props
 end
@@ -100,27 +141,6 @@ local function node(tag, props, body)
         end
     })
     return node
-end
-
-local function dirs(str)
-    str = str or 0
-    -- a corresponds to left, top
-    -- b corresponds to right, bottom
-    local a = nv()
-    local b = nv()
-    local i = 1
-    local query = "[%d.]+"
-    if not match(str, "%(.+%)") then str = format("(%d)", str) end
-    while select(2, gsub(str, query, "")) < 4 do
-        str = gsub(str, format("(%s)%%)", query), "%1,%1)")
-    end
-    for token in gmatch(str, query) do
-        local out = i <= 2 and a or b
-        local dir = i % 2 == 1 and "x" or "y"
-        out[dir] = tonumber(token)
-        i = i + 1
-    end
-    return a, b
 end
 
 function ui.load(def)
@@ -185,8 +205,8 @@ function ui.update(dt)
         local body = body[node]
         local style = styles[node]
         local dir = style.dir
-        local pa, pb = dirs(style.pad)
-        local pos = dirs(style.margin)
+        local pa, pb = bundle:dirs(style.pad)
+        local pos = bundle:dirs(style.margin)
         local box = nv()
         if body then
             for token in gmatch(body, "%%([^%s]+)") do
@@ -201,7 +221,7 @@ function ui.update(dt)
         end
         box:set(box + pa + pb)
         iter(node, function(node)
-            local ma, mb = dirs(styles[node].margin)
+            local ma, mb = bundle:dirs(styles[node].margin)
             local sub = node.box + ma + mb
             node.pos[dir] = box[dir] + ma[dir]
             if dir == "y" then
@@ -219,10 +239,10 @@ function ui.update(dt)
         local pin = node.pin
         local root = node.root
         if pin then
-            local ma, mb = dirs(styles[node].margin)
-            local shift = nv(match(pin, "(%a)%(") and box / 2)
+            local ma, mb = bundle:dirs(styles[node].margin)
+            local shift = nv(pin.arg and box / 2)
             local edge = root.box - box - mb
-            pin = dirs(pin)
+            pin = bundle:dirs(pin)
             pos:set(nv(pin.x * root.box.x, pin.y * root.box.y) - shift)
             pos:set(min(max(pos.x, ma.x), edge.x), min(max(pos.y, ma.y), edge.y))
         end
@@ -250,7 +270,7 @@ function ui.draw()
             lg.rectangle("fill", pos.x, pos.y, box:unpack())
             lg.setColor(style.color)
         end
-        return draw and draw(node, style, dirs)
+        return draw and draw(node, style)
     end)
 end
 

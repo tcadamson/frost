@@ -18,6 +18,17 @@ function util.out(t)
     end
 end
 
+function util.merge(t1, t2)
+    for k, v in pairs(t2) do
+        local mirror = t1[k]
+        if type(mirror) == "table" and type(v) == "table" then
+            util.merge(mirror, v)
+        else
+            t1[k] = v
+        end
+    end
+end
+
 function util.new(mt, t)
     return setmetatable(t or {}, meta[mt])
 end

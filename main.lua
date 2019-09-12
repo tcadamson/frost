@@ -17,7 +17,7 @@ function love.load()
     nu.load([[
         <box>
             <text click:body>%stats.fetch</text>
-            <text class:c1>
+            <text class:(c1,c2)>
                 test
                 <text>
                     top
@@ -43,6 +43,12 @@ function love.load()
         %c1 {
             margin:(5,0)
             dir:x
+        }
+        %c2 {
+            dir:y
+            %hover
+                bg:#0000ff
+            %hover
         }
     ]])
     nu.bind({

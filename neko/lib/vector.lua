@@ -88,7 +88,7 @@ return setmetatable(vec, {
         local vec = buf:add()
         x = x or 0
         y = y or 0
-        if type(x) == "cdata" then
+        if type(x) == "cdata" or type(x) == "table" then
             y = x.y
             x = x.x
         end
