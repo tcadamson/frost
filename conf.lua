@@ -18,7 +18,7 @@ neko = setmetatable({
     end
 })
 local nu = neko.util
-local nc = neko.config
+local nc = nu.new("grow", neko.config)
 local identity = "neko"
 local path = "config.ini"
 local def = [[
@@ -59,6 +59,7 @@ local function sync(w, h, flags)
     -- subsequent calls receive values from lw.getMode()
     local swap = flags and (w ~= nc.video.width or h ~= nc.video.height)
     if not flags then
+        local cat
         lf.setIdentity(identity)
         if not lf.getInfo(path) then lf.write(path, clean(def)) end
         for line in lf.lines(path) do
@@ -66,7 +67,6 @@ local function sync(w, h, flags)
                 local test = match(line, "%[%s*(.*)%s*%]")
                 if test then
                     cat = test
-                    nc[test] = {}
                 else
                     local k, v = match(line, "^%s*(.*)%s*=%s*(.+)%s*$")
                     if k and v then nc[cat][k] = tonumber(v) or v end
@@ -74,6 +74,7 @@ local function sync(w, h, flags)
             end
         end
         flags = w
+        nu.merge(flags, nc.video, true)
     end
     for k, v in pairs(flags) do
         local old = v

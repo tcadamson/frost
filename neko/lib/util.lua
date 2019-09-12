@@ -18,13 +18,18 @@ function util.out(t)
     end
 end
 
-function util.merge(t1, t2)
+function util.merge(t1, t2, diff)
     for k, v in pairs(t2) do
         local mirror = t1[k]
         if type(mirror) == "table" and type(v) == "table" then
             util.merge(mirror, v)
         else
-            t1[k] = v
+            if diff then
+                -- testing for not mirror gives false positive if mirror is false
+                if mirror == nil then t1[k] = v end
+            else
+                t1[k] = v
+            end
         end
     end
 end
