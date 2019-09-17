@@ -46,6 +46,7 @@ function love.load()
         }
         %c2 {
             dir:y
+            edge:#000000(5)
             %hover
                 bg:#0000ff
             %hover

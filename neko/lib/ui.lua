@@ -26,7 +26,7 @@ local bundle = setmetatable({
         local out = k
         if body then
             out = nu.new("grow")
-            out.arg = match(k, "^%a")
+            out.arg = match(k, "^[%x#]+")
             if not match(body, "%a") then
                 local query = "[%d.]+"
                 local i = 1
@@ -79,7 +79,7 @@ local body = setmetatable({}, {
 })
 local draw = setmetatable({
     text = function(node, style)
-        lg.print(node.body, (node.pos + bundle:dirs(style.pad)):unpack())
+        lg.print(node.body, (node.pos + bundle:dirs(style.pad) + bundle:dirs(style.edge)):unpack())
     end
 }, {
     __index = function(t, k)
@@ -206,7 +206,8 @@ function ui.update(dt)
         local style = styles[node]
         local dir = style.dir
         local pa, pb = bundle:dirs(style.pad)
-        local pos = bundle:dirs(style.margin)
+        local ea, eb = bundle:dirs(style.edge)
+        local pos = nv()
         local box = nv()
         if body then
             for token in gmatch(body, "%%([^%s]+)") do
@@ -222,8 +223,10 @@ function ui.update(dt)
         box:set(box + pa + pb)
         iter(node, function(node)
             local ma, mb = bundle:dirs(styles[node].margin)
+            local pos = node.pos
             local sub = node.box + ma + mb
-            node.pos[dir] = box[dir] + ma[dir]
+            pos:set(pos + ea + ma)
+            pos[dir] = box[dir] + ea[dir] + ma[dir]
             if dir == "y" then
                 box:set(max(box.x, sub.x), box.y + sub.y)
             else
@@ -231,7 +234,7 @@ function ui.update(dt)
             end
         end, 1)
         node.pos = pos
-        node.box = box
+        node.box = box + ea + eb
     end, -huge)
     iter(ui, function(node)
         local pos = node.pos
@@ -263,9 +266,17 @@ function ui.draw()
         local draw = draw[node]
         local style = styles[node]
         local bg = style.bg
+        local edge = style.edge
         if bg then
             local pos = node.pos
             local box = node.box
+            if edge then
+                local ea, eb = bundle:dirs(edge)
+                lg.setColor(edge.arg)
+                lg.rectangle("fill", pos.x, pos.y, box:unpack())
+                pos = pos + ea
+                box = box - ea - eb
+            end
             lg.setColor(bg)
             lg.rectangle("fill", pos.x, pos.y, box:unpack())
             lg.setColor(style.color)
