@@ -26,6 +26,11 @@ function love.load()
             </text>
         </box>
         <text pin:c(0,1) click:quit>quit</text>
+        <box pin:c(0.5,1) class:(c2,c3)>
+            <text>one</text>
+            <text>two</text>
+            <text>three</text>
+        </box>
     ]])
     nu.style([[
         text {
@@ -42,14 +47,19 @@ function love.load()
         }
         %c1 {
             margin:(5,0)
-            dir:x
         }
         %c2 {
-            dir:y
             edge:#000000(5)
             %hover
                 bg:#0000ff
+                edge:#00ff00(5)
             %hover
+        }
+        %c3 {
+            bg:#6a6a6a
+            pad:5
+            margin:5
+            dir:x
         }
     ]])
     nu.bind({

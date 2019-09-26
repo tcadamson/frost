@@ -1,4 +1,5 @@
 local type = type
+local rawget = rawget
 local format = string.format
 local match = string.match
 local lf = love.filesystem
@@ -19,19 +20,23 @@ function util.out(t)
 end
 
 function util.merge(t1, t2, diff)
+    setmetatable(t1, getmetatable(t2))
     for k, v in pairs(t2) do
-        local mirror = t1[k]
-        if type(mirror) == "table" and type(v) == "table" then
-            util.merge(mirror, v)
-        else
-            if diff then
-                -- testing for not mirror gives false positive if mirror is false
-                if mirror == nil then t1[k] = v end
+        local mirror = rawget(t1, k)
+        if type(v) == "table" then
+            if type(mirror) == "table" then
+                util.merge(mirror, v, diff)
             else
-                t1[k] = v
+                t1[k] = util.merge({}, v)
             end
+        elseif diff then
+            -- testing for not mirror gives false positive if mirror is false
+            if mirror == nil then t1[k] = v end
+        else
+            t1[k] = v
         end
     end
+    return t1
 end
 
 function util.new(mt, t)

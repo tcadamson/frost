@@ -54,9 +54,18 @@ local styles = setmetatable({
         local id = node.class
         local class = rawget(styles, id)
         if not class and type(id) == "table" then
-            class = rawget(styles, remove(id, 1))
+            class = nu.merge({}, rawget(styles, remove(id)))
             for i = 1, #id do
-                nu.merge(class, rawget(styles, id[i]))
+                nu.merge(class, rawget(styles, id[i]), true)
+            end
+            for k, v in pairs(class) do
+                -- update __index on calls to point to class amalgamate instead of class being merged
+                local meta = getmetatable(v)
+                if meta and type(v) == "table" and type(meta.__index) == "table" then
+                    setmetatable(v, {
+                        __index = class
+                    })
+                end
             end
         end
         local tag = rawget(styles, node.tag)
@@ -79,7 +88,7 @@ local body = setmetatable({}, {
 })
 local draw = setmetatable({
     text = function(node, style)
-        lg.print(node.body, (node.pos + bundle:dirs(style.pad) + bundle:dirs(style.edge)):unpack())
+        lg.print(node.body, (node.pos + bundle:dirs(style.edge) + bundle:dirs(style.pad)):unpack())
     end
 }, {
     __index = function(t, k)
@@ -205,8 +214,8 @@ function ui.update(dt)
         local body = body[node]
         local style = styles[node]
         local dir = style.dir
-        local pa, pb = bundle:dirs(style.pad)
         local ea, eb = bundle:dirs(style.edge)
+        local pa, pb = bundle:dirs(style.pad)
         local pos = nv()
         local box = nv()
         if body then
@@ -220,13 +229,12 @@ function ui.update(dt)
             node.body = body
             box:set(font:getWidth(body), font:getHeight(body))
         end
-        box:set(box + pa + pb)
         iter(node, function(node)
             local ma, mb = bundle:dirs(styles[node].margin)
             local pos = node.pos
             local sub = node.box + ma + mb
-            pos:set(pos + ea + ma)
-            pos[dir] = box[dir] + ea[dir] + ma[dir]
+            pos:set(pos + ea + ma + pa)
+            pos[dir] = box[dir] + ea[dir] + ma[dir] + pa[dir]
             if dir == "y" then
                 box:set(max(box.x, sub.x), box.y + sub.y)
             else
@@ -234,7 +242,7 @@ function ui.update(dt)
             end
         end, 1)
         node.pos = pos
-        node.box = box + ea + eb
+        node.box = box + ea + eb + pa + pb
     end, -huge)
     iter(ui, function(node)
         local pos = node.pos
@@ -251,7 +259,7 @@ function ui.update(dt)
         end
         pos:set(root.pos + pos)
         if node.hovered then
-            if draw[node] then nm.space("ui") end
+            if draw[node] or node.class then nm.space("ui") end
             nm.queue(function()
                 local call = ui[node.click]
                 if call and nm.m1.released then call(node) end
