@@ -1,13 +1,13 @@
 local unpack = unpack
 local nu = neko.util
 local axis = {}
-local q = nu.new("grow")
+local queue = nu.new("grow")
 local min = 1
 local max = 1
 
 function axis.queue(z, f, ...)
     local arg = {...}
-    local batch = q[z]
+    local batch = queue[z]
     if z > max then
         max = z
     elseif z < min then
@@ -20,7 +20,7 @@ end
 
 function axis.draw()
     for z = min, max do
-        local batch = q[z]
+        local batch = queue[z]
         for i = 1, #batch do
             batch[i]()
         end
@@ -29,7 +29,7 @@ end
 
 function axis.refresh()
     for z = min, max do
-        local batch = q[z]
+        local batch = queue[z]
         if #batch > 0 then
             -- before queueing, min is set to the observed max
             -- min is then set to lowest z during queueing

@@ -16,6 +16,7 @@ local lg = love.graphics
 local nv = neko.vector
 local nm = neko.mouse
 local nu = neko.util
+local queue = {}
 local bundle = setmetatable({
     dirs = function(t, k)
         return nv(k and k[1]), nv(k and k[2])
@@ -71,7 +72,7 @@ local styles = setmetatable({
         local tag = rawget(styles, node.tag)
         local out = setmetatable({}, {
             __index = function(t, k)
-                id = node.hovered and (nm.m1.down and "click" or "hover")
+                id = node.hovered and (node.focused and nm.m1.down and "click" or "hover")
                 return class and class[id][k] or tag and tag[id][k] or rawget(styles, k)
             end
         })
@@ -103,6 +104,7 @@ local calls = {
     "hover",
     "click"
 }
+local focus
 -- TODO: centralized font system
 local font = lg.newFont()
 
@@ -209,6 +211,13 @@ function ui.update(dt)
         local pos = node.pos
         local box = node.box
         node.hovered = nm.pos > pos and nm.pos < pos + box
+        if node.hovered then
+            for i = 1, node.root == ui and #queue or 0 do
+                local queued = queue[i]
+                queued.hovered = queued == node
+            end
+            queue[#queue + 1] = node
+        end
     end)
     iter(ui, function(node)
         local body = body[node]
@@ -262,10 +271,17 @@ function ui.update(dt)
             if draw[node] or node.class then nm.space("ui") end
             nm.queue(function()
                 local call = ui[node.click]
-                if call and nm.m1.released then call(node) end
+                if call and node.focused and nm.m1.released then call(node) end
             end)
         end
     end)
+    local top = queue[#queue]
+    focus = nm.m1.pressed and top or top == focus and focus
+    for i = 1, #queue do
+        local queued = queue[i]
+        queued.focused = queued == focus
+        queue[i] = nil
+    end
     nm.space()
 end
 

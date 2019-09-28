@@ -39,8 +39,8 @@ function util.merge(t1, t2, diff)
     return t1
 end
 
-function util.new(mt, t)
-    return setmetatable(t or {}, meta[mt])
+function util.new(id, t)
+    return setmetatable(t or {}, meta[id])
 end
 
 function util.memoize(f)
