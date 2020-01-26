@@ -43,6 +43,7 @@ local meta = {
 local buf = nm.new([[
     typedef struct {
         double x, y;
+        bool zero;
     } vec
 ]])
 
@@ -66,12 +67,17 @@ function vec:rot(add)
 end
 
 function vec:set(x, y)
+    x = x or self.x
+    y = y or self.y
     if type(x) == "cdata" then
         -- using unpack would limit us to vectors only
-        self.x, self.y = x.x, x.y
-    else
-        self.x, self.y = x, y
+        local temp = x
+        x = temp.x
+        y = temp.y
     end
+    self.x = x
+    self.y = y
+    self.zero = x == 0 and y == 0
 end
 
 function vec:unpack()
@@ -80,6 +86,10 @@ end
 
 function vec:floor()
     return vec(floor(self.x), floor(self.y))
+end
+
+function vec:hadamard(factor)
+    return vec(self.x * factor.x, self.y * factor.y)
 end
 
 ffi.metatype("vec", meta)

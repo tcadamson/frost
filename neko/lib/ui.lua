@@ -1,4 +1,5 @@
 local type = type
+local unpack = unpack
 local tonumber = tonumber
 local rawset = rawset
 local rawget = rawget
@@ -19,6 +20,7 @@ local nu = neko.util
 local queue = {}
 local bundle = setmetatable({
     dirs = function(t, k)
+        -- directions start clockwise from left side
         return nv(k and k[1]), nv(k and k[2])
     end
 }, {
@@ -108,16 +110,24 @@ local focus
 -- TODO: centralized font system
 local font = lg.newFont()
 
-local function iter(level, call, dir)
-    dir = dir or huge
+local bounds = nu.memoize(function(hash)
+    local out = {}
+    for str in gmatch(hash, "[^:]+") do
+        out[#out + 1] = tonumber(str)
+    end
+    return out
+end)
+
+local function iter(level, call, steps)
+    steps = steps or huge
     for i = 1, #level do
         local node = level[i]
         if node.status > 0 then
-            if dir > 0 then
+            if steps > 0 then
                 call(node)
-                iter(node, call, dir - 1)
-            elseif dir < 0 then
-                iter(node, call, dir + 1)
+                iter(node, call, steps - 1)
+            elseif steps < 0 then
+                iter(node, call, steps + 1)
                 call(node)
             end
         end
@@ -143,7 +153,8 @@ local function node(tag, props, body)
         tag = tag,
         body = body,
         props = props,
-        root = ui
+        root = ui,
+        frames = {}
     }, {
         __index = props,
         __newindex = function(t, k, v)
@@ -152,6 +163,18 @@ local function node(tag, props, body)
         end
     })
     return node
+end
+
+local function framed(node)
+    local style = styles[node]
+    local frame = bundle:dirs(style.frame)
+    local e1, e2 = bundle:dirs(style.edge)
+    local box = node.box
+    return frame.zero and box or (box - e1 - e2):hadamard(frame) + e1 + e2
+end
+
+local function encode(pos, box)
+    return format("%d:%d:%d:%d", pos.x, pos.y, box:unpack())
 end
 
 function ui.load(def)
@@ -209,7 +232,22 @@ end
 function ui.update(dt)
     iter(ui, function(node)
         local pos = node.pos
-        local box = node.box
+        local box = framed(node)
+        local frames = node.frames
+        local temp = node.root
+        for i = 1, #frames do
+            frames[i] = nil
+        end
+        while temp do
+            if styles[temp].frame then
+                local b1 = pos + box
+                local b2 = temp.pos + framed(temp)
+                local b3 = b2 - pos
+                box:set(b1.x > b2.x and b3.x, b1.y > b2.y and b3.y)
+                frames[#frames + 1] = temp
+            end
+            temp = temp.root
+        end
         node.hovered = nm.pos > pos and nm.pos < pos + box
         if node.hovered then
             for i = 1, node.root == ui and #queue or 0 do
@@ -223,8 +261,8 @@ function ui.update(dt)
         local body = body[node]
         local style = styles[node]
         local dir = style.dir
-        local ea, eb = bundle:dirs(style.edge)
-        local pa, pb = bundle:dirs(style.pad)
+        local e1, e2 = bundle:dirs(style.edge)
+        local p1, p2 = bundle:dirs(style.pad)
         local pos = nv()
         local box = nv()
         if body then
@@ -239,11 +277,11 @@ function ui.update(dt)
             box:set(font:getWidth(body), font:getHeight(body))
         end
         iter(node, function(node)
-            local ma, mb = bundle:dirs(styles[node].margin)
+            local m1, m2 = bundle:dirs(styles[node].margin)
             local pos = node.pos
-            local sub = node.box + ma + mb
-            pos:set(pos + ea + ma + pa)
-            pos[dir] = box[dir] + ea[dir] + ma[dir] + pa[dir]
+            local sub = node.box + m1 + m2
+            pos:set(pos + e1 + m1 + p1)
+            pos[dir] = box[dir] + e1[dir] + m1[dir] + p1[dir]
             if dir == "y" then
                 box:set(max(box.x, sub.x), box.y + sub.y)
             else
@@ -251,7 +289,7 @@ function ui.update(dt)
             end
         end, 1)
         node.pos = pos
-        node.box = box + ea + eb + pa + pb
+        node.box = box + e1 + e2 + p1 + p2
     end, -huge)
     iter(ui, function(node)
         local pos = node.pos
@@ -259,12 +297,12 @@ function ui.update(dt)
         local pin = node.pin
         local root = node.root
         if pin then
-            local ma, mb = bundle:dirs(styles[node].margin)
+            local m1, m2 = bundle:dirs(styles[node].margin)
             local shift = nv(pin.arg and box / 2)
-            local edge = root.box - box - mb
+            local edge = root.box - box - m2
             pin = bundle:dirs(pin)
             pos:set(nv(pin.x * root.box.x, pin.y * root.box.y) - shift)
-            pos:set(min(max(pos.x, ma.x), edge.x), min(max(pos.y, ma.y), edge.y))
+            pos:set(min(max(pos.x, m1.x), edge.x), min(max(pos.y, m1.y), edge.y))
         end
         pos:set(root.pos + pos)
         if node.hovered then
@@ -293,13 +331,26 @@ function ui.draw()
         local edge = style.edge
         if bg then
             local pos = node.pos
-            local box = node.box
+            local box = framed(node)
+            local frames = node.frames
+            lg.setScissor()
+            if #frames > 0 then
+                for i = #frames, 1, -1 do
+                    local frame = frames[i]
+                    local e1, e2 = bundle:dirs(styles[frame].edge)
+                    local pos = frame.pos + e1
+                    lg.intersectScissor(unpack(bounds[encode(pos, framed(frame) - e1 - e2)]))
+                end
+            end
             if edge then
-                local ea, eb = bundle:dirs(edge)
+                local e1, e2 = bundle:dirs(edge)
                 lg.setColor(edge.arg)
                 lg.rectangle("fill", pos.x, pos.y, box:unpack())
-                pos = pos + ea
-                box = box - ea - eb
+                pos = pos + e1
+                box = box - e1 - e2
+            end
+            if style.frame then
+                lg.intersectScissor(unpack(bounds[encode(pos, box)]))
             end
             lg.setColor(bg)
             lg.rectangle("fill", pos.x, pos.y, box:unpack())

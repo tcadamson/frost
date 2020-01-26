@@ -19,9 +19,13 @@ function love.load()
             <text click:body>%stats.fetch</text>
             <text class:(c1,c2)>
                 test
-                <text>
+                <text class:c4>
                     top
-                    <text>bottom</text>
+                    <text click:body>bottom</text>
+                </text>
+                <text>
+                    inquisition
+                    <text>hm</text>
                 </text>
             </text>
         </box>
@@ -46,6 +50,7 @@ function love.load()
             %click
         }
         %c1 {
+            frame:(0.5,1)
             margin:(5,0)
         }
         %c2 {
@@ -60,6 +65,10 @@ function love.load()
             pad:5
             margin:5
             dir:x
+        }
+        %c4 {
+            frame:(0.7)
+            edge:#000000(5)
         }
     ]])
     nu.bind({
