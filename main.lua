@@ -1,4 +1,4 @@
-require("neko.init")
+require("neko/init")
 local le = love.event
 local ns = neko.state
 local nl = neko.lerp

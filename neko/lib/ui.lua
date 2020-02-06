@@ -17,6 +17,7 @@ local lg = love.graphics
 local nv = neko.vector
 local nm = neko.mouse
 local nu = neko.util
+local nr = neko.res
 local queue = {}
 local bundle = setmetatable({
     dirs = function(t, k)
@@ -51,7 +52,8 @@ local bundle = setmetatable({
     end
 })
 local styles = setmetatable({
-    dir = "y"
+    dir = "y",
+    font = "unscii"
 }, {
     __index = function(styles, node)
         local id = node.class
@@ -107,8 +109,6 @@ local calls = {
     "click"
 }
 local focus
--- TODO: centralized font system
-local font = lg.newFont()
 
 local bounds = nu.memoize(function(hash)
     local out = {}
@@ -261,6 +261,7 @@ function ui.update(dt)
         local body = body[node]
         local style = styles[node]
         local dir = style.dir
+        local font = nr[style.font]
         local e1, e2 = bundle:dirs(style.edge)
         local p1, p2 = bundle:dirs(style.pad)
         local pos = nv()
@@ -354,6 +355,7 @@ function ui.draw()
             end
             lg.setColor(bg)
             lg.rectangle("fill", pos.x, pos.y, box:unpack())
+            lg.setFont(nr[style.font])
             lg.setColor(style.color)
         end
         return draw and draw(node, style)

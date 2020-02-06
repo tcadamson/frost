@@ -3,9 +3,9 @@ local lg = love.graphics
 local lm = love.mouse
 local nc = neko.config
 local nv = neko.vector
-local nd = neko.video
 local na = neko.camera
 local nu = neko.util
+local nr = neko.res
 local queue = nu.new("grow")
 local mouse = nu.new("grow", {
     pos = nv(),
@@ -20,7 +20,7 @@ local buttons = 3
 local space
 
 function mouse.init()
-    local img = nd.cursor
+    local img = nr.cursor
     local canvas = lg.newCanvas(img:getDimensions() * nc.video.scale)
     canvas:renderTo(function()
         lg.draw(img, 0, 0, 0, nc.video.scale, nc.video.scale)

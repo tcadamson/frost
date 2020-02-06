@@ -2,6 +2,7 @@ local type = type
 local rawget = rawget
 local format = string.format
 local match = string.match
+local gsub = string.gsub
 local lf = love.filesystem
 local util = {}
 local meta = {
@@ -55,13 +56,12 @@ end
 function util.crawl(dir, call, filter)
     filter = filter or ""
     for k, v in pairs(lf.getDirectoryItems(dir)) do
-        local short = format("%s/%s", dir, match(v, "[^.]+"))
-        local ext = match(v, "%.%w+$") or ""
-        local path = short .. ext
+        local path = format("%s/%s", dir, v)
+        local ext = match(v, "%w+$")
         if lf.getInfo(path, "file") and match(ext, filter) then
-            call(match(short, "/(%w+)$"), ext == ".lua" and short or path)
+            call(gsub(path, ".lua", ""), match(v, "%w+"), ext)
         else
-            util.crawl(short, call, filter)
+            util.crawl(path, call, filter)
         end
     end
 end

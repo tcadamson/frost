@@ -53,7 +53,7 @@ function ecs.new(data, override)
     local e = remove(dead) or uid
     uid = uid + 1
     if data then
-        if type(data) == "string" then data = require("res/ecs/" .. data) end
+        if type(data) == "string" then data = require("res/script/data/" .. data) end
         for k, v in pairs(data) do
             if type(k) == "number" then
                 k = v
