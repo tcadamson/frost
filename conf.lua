@@ -6,6 +6,7 @@ local match = string.match
 local gmatch = string.gmatch
 local gsub = string.gsub
 local lf = love.filesystem
+local lg = love.graphics
 neko = setmetatable({
     config = {}
 }, {
@@ -73,8 +74,7 @@ local function sync(w, h, flags)
                 end
             end
         end
-        flags = w
-        nu.merge(flags, nc.video, true)
+        flags = nu.merge(w, nc.video, true)
     end
     for k, v in pairs(flags) do
         local old = v
@@ -85,7 +85,7 @@ local function sync(w, h, flags)
             flags[k] = new
         end
     end
-    return swap and flags
+    return (swap or not lg) and flags
 end
 
 function love.conf(t)
