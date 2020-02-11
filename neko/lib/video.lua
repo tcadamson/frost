@@ -55,8 +55,8 @@ lg.setDefaultFilter("nearest", "nearest")
 
 function video.resize(w, h)
     local box = nv(w, h) / nc.video.scale
-    nc.video.width = w
-    nc.video.height = h
+    nc.video.w = w
+    nc.video.h = h
     canvas = lg.newCanvas(w, h)
     video.box:set(box)
     -- ui depends on mouse which depends on video

@@ -20,7 +20,7 @@ ni.init({
         "w"
     }
 })
-nv.resize(nc.video.width, nc.video.height)
+nv.resize(nc.video.w, nc.video.h)
 nr.rate = 1 / 144
 -- post-load operations
 local ns = neko.state.new()

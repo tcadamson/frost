@@ -1,12 +1,12 @@
 local type = type
 local tonumber = tonumber
 local tostring = tostring
+local select = select
 local format = string.format
 local match = string.match
 local gmatch = string.gmatch
 local gsub = string.gsub
 local lf = love.filesystem
-local lg = love.graphics
 neko = setmetatable({
     config = {}
 }, {
@@ -20,7 +20,7 @@ neko = setmetatable({
 })
 local nu = neko.util
 local nc = nu.new("grow", neko.config)
-local identity = "neko"
+local identity = "frost"
 local path = "config.ini"
 local def = [[
     [video]
@@ -29,8 +29,8 @@ local def = [[
     vsync=0
     scale=2
     display=1
-    width=1280
-    height=720
+    w=1280
+    h=720
 
     [controls]
     quit=q
@@ -55,10 +55,11 @@ local function clean(str, override)
     end), "(.+)%s+$")
 end
 
-local function sync(w, h, flags)
+local function sync(...)
     -- first call receives t.window from love.conf
     -- subsequent calls receive values from lw.getMode()
-    local swap = flags and (w ~= nc.video.width or h ~= nc.video.height)
+    local w, h, flags = ...
+    local swap = flags and (w ~= nc.video.w or h ~= nc.video.h)
     if not flags then
         local cat
         lf.setIdentity(identity)
@@ -85,14 +86,14 @@ local function sync(w, h, flags)
             flags[k] = new
         end
     end
-    return (swap or not lg) and flags
+    return (swap or select("#", ...) == 1) and flags
 end
 
 function love.conf(t)
-    local w = sync(t.window)
-    w.title = identity
-    w.resizable = true
-    w.icon = nil
+    local window = sync(t.window)
+    window.title = identity
+    window.resizable = true
+    window.icon = nil
     setmetatable(nc, {
         __index = {
             init = function()
@@ -100,7 +101,7 @@ function love.conf(t)
                 local lr = love.resize
                 local flags = sync(lw.getMode())
                 if flags then
-                    lw.setMode(nc.video.width, nc.video.height, flags)
+                    lw.setMode(nc.video.w, nc.video.h, flags)
                     -- lw.setMode doesn't trigger the resize call
                     -- lr not available in fullscreen
                     if lr then lr(lw.getMode()) end
