@@ -5,8 +5,10 @@ local match = string.match
 local gmatch = string.gmatch
 local gsub = string.gsub
 local remove = table.remove
+local lf = love.filesystem
 local nu = neko.util
 local nm = neko.mem
+local ny = neko.yaml
 local ffi = require("ffi")
 local ecs = {}
 local com = {}
@@ -19,6 +21,10 @@ local cdef = {
     tex = "const char *file, *hash; int x, y, w, h, sx, sy"
 }
 local uid = 0
+
+local yaml = nu.memoize(function(id)
+    return ny.eval(lf.read(format("res/data/%s.yml", id)))
+end)
 
 for k, v in pairs(cdef) do
     com[k] = nm.new(format([[
@@ -53,12 +59,7 @@ function ecs.new(data, override)
     local e = remove(dead) or uid
     uid = uid + 1
     if data then
-        if type(data) == "string" then data = require("res/script/data/" .. data) end
-        for k, v in pairs(data) do
-            if type(k) == "number" then
-                k = v
-                v = {}
-            end
+        for k, v in pairs(type(data) == "string" and yaml[data] or data) do
             ecs[k][e] = v
             -- components with a uid field must have inaccessible default
             -- -1 is suitable since uid >= 0
