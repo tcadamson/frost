@@ -134,28 +134,24 @@ local function iter(level, call, steps)
     end
 end
 
-local function process(str, props)
-    props = props or {
-        status = 1,
-        pos = nv(),
-        box = nv()
-    }
-    for k in gmatch(str, "(%a+):") do
-        local v = gsub(match(str, k .. ":([^%c:]+)"), "%s+%a+$", "")
-        props[k] = bundle[v]
-    end
-    return props
-end
-
 local function node(tag, props, body)
-    local props = process(props)
-    local node = setmetatable({
+    local temp = props
+    local node = {
         tag = tag,
         body = body,
-        props = props,
         root = ui,
         frames = {}
-    }, {
+    }
+    props = {
+        pos = nv(),
+        box = nv(),
+        status = 1
+    }
+    for k in gmatch(temp, "(%a+):") do
+        props[k] = bundle[gsub(match(temp, k .. ":([^%c:]+)"), "%s+%a+$", "")]
+    end
+    node.props = props
+    setmetatable(node, {
         __index = props,
         __newindex = function(t, k, v)
             t = type(k) == "number" and t or props
@@ -177,49 +173,44 @@ local function encode(pos, box)
     return format("%d:%d:%d:%d", pos.x, pos.y, box:unpack())
 end
 
-function ui.load(def)
+function ui.load(id)
     local stack = {}
-    for tag, props, body in gmatch(def, "<([%a/]+)(.-)>([^<]*)") do
+    for tag, props, body in gmatch(nr[id].markup, "<([%a/]+)(.-)>([^<]*)") do
         body = match(body, "%w") and gsub(match(body, "%s*(.-)%s*$"), "(%c)%s+", "%1")
         if match(tag, "/%a+") then
             local last = ui.tag
-            if not last then
-                error(tag .. ": no opening tag")
-            else
-                if not match(tag, last) then error(format("%s: expected /%s", tag, last)) end
-                ui = remove(stack)
-            end
+            if not last then error(tag .. ": no opening tag") end
+            if not match(tag, last) then error(format("%s: expected /%s", tag, last)) end
+            ui = remove(stack)
         else
-            local new = node(tag, props, body)
+            local node = node(tag, props, body)
             stack[#stack + 1] = ui
-            ui[#ui + 1] = new
-            ui = new
+            ui[#ui + 1] = node
+            ui = node
         end
     end
-    if ui.tag then
-        error(ui.tag .. ": no closing tag")
-    end
+    if ui.tag then error(ui.tag .. ": no closing tag") end
+    ui.style(id)
 end
 
-function ui.style(def)
-    for target, body in gmatch(def, "([%%%w]+)%s*{([^}]*)") do
-        -- TODO: justify prefixing classes with %
-        local out = {}
+function ui.style(id)
+    for k, v in pairs(nr[id].style) do
+        local out = nu.merge({}, v)
         for i = 1, #calls do
-            out[calls[i]] = setmetatable({}, {
+            local call = calls[i]
+            out[call] = setmetatable(out[call] or {}, {
                 __index = out
             })
         end
-        for call, override in gmatch(body, "%%(%a+)(.-)%%") do
-            body = gsub(body, call .. ".-%%", "")
-            out[call] = process(override, out[call])
-        end
-        styles[gsub(target, "%%", "")] = setmetatable(process(body, out), {
+        styles[k] = setmetatable(out, {
             __index = function(t, k)
                 -- index by state test and return root table if it fails
                 return not k and t
             end
         })
+        nu.iter(out, function(t, k, v)
+            t[k] = bundle[gsub(v, "0x%((%x+)%)", "#%1")]
+        end)
     end
 end
 

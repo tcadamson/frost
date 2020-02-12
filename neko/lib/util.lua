@@ -40,6 +40,16 @@ function util.merge(t1, t2, diff)
     return t1
 end
 
+function util.iter(t, call)
+    for k, v in pairs(t) do
+        if type(v) == "table" then
+            util.iter(v, call)
+        else
+            call(t, k, v)
+        end
+    end
+end
+
 function util.new(id, t)
     return setmetatable(t or {}, meta[id])
 end

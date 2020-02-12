@@ -1,9 +1,14 @@
+local lf = love.filesystem
 local lg = love.graphics
 local nu = neko.util
+local ny = neko.yaml
 local res = {}
 local loader = {
     fnt = lg.newFont,
-    png = lg.newImage
+    png = lg.newImage,
+    yml = function(path)
+        return ny.eval(lf.read(path))
+    end
 }
 
 nu.crawl("res", function(path, id, ext)
