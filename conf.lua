@@ -57,7 +57,7 @@ end
 
 local function sync(...)
     -- first call receives t.window from love.conf
-    -- subsequent calls receive values from lw.getMode()
+    -- subsequent calls receive values from lw.getMode
     local w, h, flags = ...
     local swap = flags and (w ~= nc.video.w or h ~= nc.video.h)
     if not flags then
@@ -93,7 +93,9 @@ function love.conf(t)
     local window = sync(t.window)
     window.title = identity
     window.resizable = true
-    window.icon = nil
+    -- lw.setMode not yet available
+    window.width = window.w
+    window.height = window.h
     setmetatable(nc, {
         __index = {
             init = function()
