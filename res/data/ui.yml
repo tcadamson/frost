@@ -7,7 +7,7 @@ markup:
                 top
                 <text click:body>bottom</text>
             </text>
-            <text>
+            <text class:c2>
                 inquisition
                 <text>hm</text>
             </text>
@@ -15,9 +15,9 @@ markup:
     </box>
     <text pin:c(0,1) click:quit>quit</text>
     <box pin:c(0.5,1) class:(c2,c3)>
-        <text>one</text>
-        <text>two</text>
-        <text>three</text>
+        <q id:i1/>
+        <q id:i2/>
+        <q id:i3/>
     </box>
 style:
     text:
@@ -29,8 +29,12 @@ style:
         click:
             bg: 0x(ffffff)
             color: 0x(000000)
+    q:
+        margin: 5
+        hover:
+            color: 0x(ff0000)
     c1:
-        frame: (0.5,1)
+        frame: (0.7,1)
         margin: (5,0)
     c2:
         edge: 0x(000000)(5)
@@ -39,9 +43,9 @@ style:
             edge: 0x(00ff00)(5)
     c3:
         bg: 0x(6a6a6a)
+        dir: x
         pad: 5
         margin: 5
-        dir: x
     c4:
         frame: (0.7)
         edge: 0x(000000)(5)
