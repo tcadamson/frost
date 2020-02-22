@@ -354,7 +354,7 @@ function ui.draw()
         if edge then
             local e1, e2 = bundle.dirs(edge)
             lg.setColor(edge.arg)
-            lg.rectangle("fill", pos.x, pos.y, box:unpack())
+            lg.rectangle("fill", pos.x, pos.y, box.x, box.y, bundle.dirs(style.r):unpack())
             pos = pos + e1
             box = box - e1 - e2
         end

@@ -37,7 +37,7 @@ function stats.fetch()
             stats[i] = format("%s ~ " .. token, id, calls[i]())
         end
     end
-    return concat(stats, " / ")
+    return concat(stats, "  ")
 end
 
 return stats

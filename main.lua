@@ -1,5 +1,4 @@
 require("neko/init")
-local le = love.event
 local ns = neko.state
 local nl = neko.lerp
 local ne = neko.ecs
@@ -16,9 +15,6 @@ function love.load()
     ns:switch("game")
     nu.load("ui")
     nu.bind({
-        quit = function(node)
-            le.quit()
-        end,
         body = function(node)
             print(node.body)
         end
