@@ -1,5 +1,4 @@
 local floor = math.floor
-local sin = math.sin
 local lg = love.graphics
 local le = love.event
 local ne = neko.ecs
@@ -8,10 +7,8 @@ local na = neko.camera
 local nd = neko.video
 local nv = neko.vector
 local nm = neko.mouse
-local nr = neko.run
 local nx = neko.axis
 local game = {}
-local tests = 999
 local p1
 local m1
 
@@ -26,7 +23,7 @@ end
 
 local function draw()
     lg.push()
-    lg.translate((na.shift - na.origin):unpack())
+    lg.translate((na.shift - na.pos):unpack())
     field()
     nx.draw()
     if ni.focus.down then
@@ -42,9 +39,6 @@ local function draw()
 end
 
 function game:enter()
-    for i = 0, tests do
-        ne.new("m2")
-    end
     p1 = ne.new("p1", {
         pos = {
             x = 0,
@@ -69,14 +63,6 @@ function game:update(dt)
             ne.on(p1, "target")
             target.x, target.y = nm.world:unpack()
         end)
-    end
-    for i = 0, tests do
-        local j = i + 1
-        local scale = 10
-        local speed = 0.05
-        local shift = 100
-        ne.pos[i].x = j * scale
-        ne.pos[i].y = sin(nr.tick * speed - j) * scale + shift
     end
     if ni.act.pressed then
         na.shake()

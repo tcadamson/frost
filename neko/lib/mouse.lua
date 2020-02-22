@@ -32,7 +32,7 @@ function mouse.update(dt)
     local pos = mouse.pos
     local abort
     pos:set(nv(lm.getPosition()) / nc.video.scale)
-    mouse.world:set(pos + na.origin)
+    mouse.world:set(pos + na.pos)
     for i = 1, buttons do
         nu.poll(lm.isDown(i), mouse["m" .. i])
     end
