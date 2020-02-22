@@ -42,6 +42,8 @@ local rgb = nu.memoize(function(hex)
     end
 end)
 
+lg.setLineStyle("rough")
+lg.setDefaultFilter("nearest", "nearest")
 for i = 1, #override do
     local call = override[i]
     local old = lg[call]
@@ -50,8 +52,6 @@ for i = 1, #override do
         old(rgb[hex])
     end
 end
-lg.setLineStyle("rough")
-lg.setDefaultFilter("nearest", "nearest")
 
 function video.resize(w, h)
     local box = nv(w, h) / nc.video.scale
@@ -74,6 +74,8 @@ function video.draw(draw)
     lg.setBlendMode("alpha", "premultiplied")
     lg.draw(canvas, 0, 0, 0, nc.video.scale, nc.video.scale)
     lg.setBlendMode("alpha")
+    -- store stats before they are reset at the end of draw
+    nu.merge(video, lg.getStats())
 end
 
 return video

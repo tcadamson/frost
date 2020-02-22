@@ -13,18 +13,17 @@ local items = {
 }
 local calls = {
     "lt.getFPS()",
-    "lg.getStats().drawcalls",
+    "neko.video.drawcalls",
     "collectgarbage(\"count\") / kb"
 }
 local step = 50
 
 for i = 1, #calls do
     calls[i] = loadstring(format([[
-        local lg = love.graphics
         local lt = love.timer
         local kb = 1024
         return function()
-            return %s
+            return %s or 0
         end
     ]], calls[i]))()
 end
