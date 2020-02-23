@@ -59,12 +59,12 @@ local styles = setmetatable({
         local id = node.class
         local class = rawget(styles, id)
         if not class and type(id) == "table" then
-            class = nu.merge({}, rawget(styles, remove(id)))
-            for i = 1, #id do
+            class = nu.merge({}, rawget(styles, id[#id]))
+            for i = 1, #id - 1 do
                 nu.merge(class, rawget(styles, id[i]), true)
             end
             for k, v in pairs(class) do
-                -- update __index on calls to point to class amalgamate instead of class being merged
+                -- update __index on calls to point to class amalgam instead of class being merged
                 local meta = getmetatable(v)
                 if meta and type(v) == "table" and type(meta.__index) == "table" then
                     setmetatable(v, {

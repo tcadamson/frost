@@ -3,9 +3,18 @@ markup:
         <text click:body>%stats.fetch</text>
     </box>
     <box pin:c(0.5,1) class:c1>
-        <q id:i1/>
-        <q id:i2/>
-        <q id:i3/>
+        <box pin:c(0,1) class:(c1,c2,c3)>
+            <text class:c4>hp ~ 50/50</text>
+        </box>
+        <box class:(c1,c2)>
+            <q id:i1/>
+            <q id:i2/>
+            <q id:i3/>
+            <q id:i4/>
+        </box>
+        <box pin:c(1,1) class:(c1,c2,c3)>
+            <text class:c4>mp ~ 50/50</text>
+        </box>
     </box>
 style:
     text:
@@ -22,11 +31,18 @@ style:
         hover:
             color: 0x(ff0000)
     c1:
-        bg: 0x(6a6a6a)
-        edge: 0x(000000)(4)
         dir: x
+    c2:
+        bg: 0x(6a6a6a)
+        edge: 0x(484848)(4)
         r: 2
         pad: (5,3,5,3)
         margin: 5
         hover:
             bg: 0x(0000ff)
+    c3:
+        pad: 0
+        margin: (0,0,0,5)
+    c4:
+        pad: 5
+        margin: 0
