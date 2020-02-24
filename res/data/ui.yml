@@ -4,7 +4,7 @@ markup:
     </box>
     <box pin:c(0.5,1) class:c1>
         <box pin:c(0,1) class:(c1,c2,c3)>
-            <text class:c4>hp ~ 50/50</text>
+            <text>hp ~ 50/50</text>
         </box>
         <box class:(c1,c2)>
             <q id:i1/>
@@ -13,36 +13,32 @@ markup:
             <q id:i4/>
         </box>
         <box pin:c(1,1) class:(c1,c2,c3)>
-            <text class:c4>mp ~ 50/50</text>
+            <text>mp ~ 50/50</text>
         </box>
     </box>
 style:
     text:
         bg: 0x(6a6a6a)
         pad: 5
-        margin: 5
         hover:
             bg: 0x(ff0000)
         click:
             bg: 0x(ffffff)
             color: 0x(000000)
     q:
-        margin: 5
+        margin: 4
         hover:
             color: 0x(ff0000)
     c1:
         dir: x
+        shift: (0,4)
     c2:
         bg: 0x(6a6a6a)
         edge: 0x(484848)(4)
+        pad: (7,5,7,5)
+        margin: (6,0,6,0)
         r: 2
-        pad: (5,3,5,3)
-        margin: 5
-        hover:
-            bg: 0x(0000ff)
+        shift: 0
     c3:
         pad: 0
-        margin: (0,0,0,5)
-    c4:
-        pad: 5
         margin: 0

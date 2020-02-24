@@ -32,7 +32,7 @@ local bundle = setmetatable({
             out = nu.new("grow")
             out.arg = match(k, "^[%x#]+")
             if not match(body, "%a") then
-                local query = "[%d.]+"
+                local query = "[%d.-]+"
                 local i = 1
                 while select(2, gsub(body, query, "")) < 4 do
                     body = gsub(body, format("(%s)$", query), "%1,%1")
@@ -60,7 +60,7 @@ local styles = setmetatable({
         local class = rawget(styles, id)
         if not class and type(id) == "table" then
             class = nu.merge({}, rawget(styles, id[#id]))
-            for i = 1, #id - 1 do
+            for i = #id - 1, 1, -1 do
                 nu.merge(class, rawget(styles, id[i]), true)
             end
             for k, v in pairs(class) do
@@ -302,19 +302,20 @@ function ui.update(dt)
         node.box = box + e1 + e2 + p1 + p2
     end, -huge)
     iter(ui, function(node)
+        local style = styles[node]
         local pos = node.pos
         local box = node.box
         local pin = node.pin
         local root = node.root
         if pin then
-            local m1, m2 = bundle.dirs(styles[node].margin)
+            local m1, m2 = bundle.dirs(style.margin)
             local shift = nv(pin.arg and box / 2)
             local edge = root.box - box - m2
             pin = bundle.dirs(pin)
             pos:set(nv(pin.x * root.box.x, pin.y * root.box.y) - shift)
             pos:set(min(max(pos.x, m1.x), edge.x), min(max(pos.y, m1.y), edge.y))
         end
-        pos:set(root.pos + pos)
+        pos:set(root.pos + pos + bundle.dirs(style.shift))
         if node.hovered then
             if tags[node] or node.class then nm.space("ui") end
             nm.queue(function()
