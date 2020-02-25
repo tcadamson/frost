@@ -19,7 +19,7 @@ local cdef = {
     phys = "double v",
     steer = "double x, y",
     target = "double x, y; int uid, radius",
-    tex = "const char *file, *hash; int x, y, w, h, sx, sy"
+    tex = "const char *id"
 }
 local uid = 0
 

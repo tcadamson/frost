@@ -4,7 +4,6 @@ local tostring = tostring
 local select = select
 local format = string.format
 local match = string.match
-local gmatch = string.gmatch
 local gsub = string.gsub
 local lf = love.filesystem
 neko = setmetatable({

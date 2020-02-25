@@ -1,4 +1,5 @@
 local type = type
+local tonumber = tonumber
 local sqrt = math.sqrt
 local sin = math.sin
 local cos = math.cos
@@ -102,7 +103,8 @@ return setmetatable(vec, {
             y = x.y
             x = x.x
         end
-        vec:set(x, y)
+        -- cast matches from string.match or other string functions
+        vec:set(tonumber(x), tonumber(y))
         return vec
     end
 })

@@ -32,8 +32,7 @@ function camera.focus(e)
     target = e
 end
 
-function camera.culled(pos, tex)
-    local shift = nv(tex.sx, tex.sy)
+function camera.culled(pos, shift)
     local net = nv(pos) - camera.pos
     return check(shift + net) or check(shift - net + nd.box)
 end

@@ -105,10 +105,11 @@ local tags = setmetatable({
     },
     q = {
         size = function(node)
-            return nr[node.id]:getDimensions()
+            return nr[node.id].size
         end,
         draw = function(node, pos)
-            lg.draw(nr[node.id], pos:unpack())
+            local data = nr[node.id]
+            lg.draw(data.tex, data.q, pos:unpack())
         end
     }
 }, {
@@ -366,7 +367,7 @@ function ui.draw()
         end
         lg.setFont(nr[style.font])
         lg.setColor(style.color)
-        return tag and tag.draw(node, pos + bundle.dirs(style.pad))
+        return tag and tag.draw(node, (pos + bundle.dirs(style.pad)):floor())
     end)
 end
 

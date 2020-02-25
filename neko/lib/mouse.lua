@@ -20,10 +20,10 @@ local buttons = 3
 local space
 
 function mouse.init()
-    local img = nr.cursor
-    local canvas = lg.newCanvas(img:getDimensions() * nc.video.scale)
+    local data = nr.i5
+    local canvas = lg.newCanvas((data.size * nc.video.scale):unpack())
     canvas:renderTo(function()
-        lg.draw(img, 0, 0, 0, nc.video.scale, nc.video.scale)
+        lg.draw(data.tex, data.q, 0, 0, 0, nc.video.scale, nc.video.scale)
     end)
     lm.setCursor(lm.newCursor(canvas:newImageData()))
 end
