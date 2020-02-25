@@ -31,20 +31,21 @@ local bundle = setmetatable({
         if body then
             out = nu.new("grow")
             out.arg = match(k, "^[%x#]+")
-            if not match(body, "%a") then
-                local query = "[%d.-]+"
-                local i = 1
-                while select(2, gsub(body, query, "")) < 4 do
-                    body = gsub(body, format("(%s)$", query), "%1,%1")
-                end
-                for token in gmatch(body, query) do
-                    out[ceil(i / 2)][i % 2 == 1 and "x" or "y"] = tonumber(token)
-                    i = i + 1
-                end
-            else
+            if match(body, "%a") then
                 for token in gmatch(k, "[(,](%w+)") do
                     out[#out + 1] = token
                 end
+            else
+                local query = "[%d.-]+"
+                local max = 4
+                while select(2, gsub(body, query, "")) < max do
+                    body = gsub(body, body, "%1,%1")
+                end
+                for i = 1, max do
+                    out[ceil(i / 2)][i % 2 == 1 and "x" or "y"] = tonumber(match(body, query))
+                    body = gsub(body, query .. ",*", "", 1)
+                end
+                if #body > 0 then out[#out].y = 0 end
             end
         end
         t[k] = out
