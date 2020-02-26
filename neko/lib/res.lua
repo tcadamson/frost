@@ -29,7 +29,9 @@ local qs = {
     "atlas:i3:46:2:20:20",
     "atlas:i4:68:2:20:20",
     "atlas:i5:2:24:27:27",
-    "atlas:i6:2:53:26:26"
+    "atlas:i6:2:53:26:26",
+    "atlas:i7:90:2:11:13",
+    "atlas:i8:103:2:11:13"
 }
 
 local q = nu.memoize(function(hash)

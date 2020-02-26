@@ -117,6 +117,21 @@ local tags = setmetatable({
         return rawget(t, k.tag)
     end
 })
+local opps = setmetatable({
+    "x:y"
+}, {
+    __index = function(t, k)
+        for i = 1, #t do
+            local str = t[i]
+            local query = format(":*%s:*", k)
+            local opp, subs = gsub(str, query, "")
+            if subs > 0 then
+                t[k] = opp
+                return opp
+            end
+        end
+    end
+})
 local ui = {
     pos = nv(),
     box = nv()
@@ -245,19 +260,19 @@ function ui.update(dt)
         local pos = node.pos
         local box = framed(node)
         local frames = node.frames
-        local temp = node.root
+        local root = node.root
         for i = 1, #frames do
             frames[i] = nil
         end
-        while temp do
-            if styles[temp].frame then
+        while root do
+            if styles[root].frame then
                 local b1 = pos + box
-                local b2 = temp.pos + framed(temp)
+                local b2 = root.pos + framed(root)
                 local b3 = b2 - pos
                 box:set(b1.x > b2.x and b3.x, b1.y > b2.y and b3.y)
-                frames[#frames + 1] = temp
+                frames[#frames + 1] = root
             end
-            temp = temp.root
+            root = root.root
         end
         node.hovered = nm.pos > pos and nm.pos < pos + box
         if node.hovered then
@@ -292,30 +307,37 @@ function ui.update(dt)
             local m1, m2 = bundle.dirs(styles[node].margin)
             local pos = node.pos
             local sub = node.box + m1 + m2
+            local opp = opps[dir]
             pos:set(pos + e1 + m1 + p1)
             pos[dir] = box[dir] + e1[dir] + m1[dir] + p1[dir]
-            if dir == "y" then
-                box:set(max(box.x, sub.x), box.y + sub.y)
-            else
-                box:set(box.x + sub.x, max(box.y, sub.y))
-            end
+            box[dir] = box[dir] + sub[dir]
+            box[opp] = max(box[opp], sub[opp])
         end, 1)
         node.pos = pos
         node.box = box + e1 + e2 + p1 + p2
     end, -huge)
     iter(ui, function(node)
         local style = styles[node]
+        local inherit = styles[node.root]
         local pos = node.pos
         local box = node.box
         local pin = node.pin
         local root = node.root
+        local m1, m2 = bundle.dirs(style.margin)
+        local e1, e2 = bundle.dirs(inherit.edge)
+        local align = bundle.dirs(inherit.align)
+        local cropped = root.box - e1 - e2
+        if not align.zero then
+            local p1, p2 = bundle.dirs(inherit.pad)
+            local opp = opps[inherit.dir]
+            pos[opp] = (pos + (cropped - box - m1 - m2 - p1 - p2):hadamard(align))[opp]
+        end
         if pin then
-            local m1, m2 = bundle.dirs(style.margin)
             local shift = nv(pin.arg and box / 2)
-            local edge = root.box - box - m2
-            pin = bundle.dirs(pin)
-            pos:set(nv(pin.x * root.box.x, pin.y * root.box.y) - shift)
+            local edge = cropped - box - m2
+            pos:set(bundle.dirs(pin):hadamard(cropped) - shift)
             pos:set(min(max(pos.x, m1.x), edge.x), min(max(pos.y, m1.y), edge.y))
+            pos:set(pos + e1)
         end
         pos:set(root.pos + pos + bundle.dirs(style.shift))
         if node.hovered then
@@ -354,6 +376,7 @@ function ui.draw()
             end
         end
         if style.frame then lg.intersectScissor(unpack(bounds[encode(pos, box)])) end
+        pos = pos:floor()
         if edge then
             local e1, e2 = bundle.dirs(edge)
             lg.setColor(edge.arg)
@@ -367,7 +390,7 @@ function ui.draw()
         end
         lg.setFont(nr[style.font])
         lg.setColor(style.color)
-        return tag and tag.draw(node, (pos + bundle.dirs(style.pad)):floor())
+        return tag and tag.draw(node, pos + bundle.dirs(style.pad))
     end)
 end
 
