@@ -193,14 +193,6 @@ local function node(tag, props, body)
     return node
 end
 
-local function framed(node)
-    local style = styles[node]
-    local frame = bundle.dirs(style.frame)
-    local e1, e2 = bundle.dirs(style.edge)
-    local box = node.box
-    return frame.zero and box or (box - e1 - e2):hadamard(frame) + e1 + e2
-end
-
 local function encode(pos, box)
     return format("%d:%d:%d:%d", pos.x, pos.y, box:unpack())
 end
@@ -258,7 +250,7 @@ end
 function ui.update(dt)
     iter(ui, function(node)
         local pos = node.pos
-        local box = framed(node)
+        local box = node.box
         local frames = node.frames
         local root = node.root
         for i = 1, #frames do
@@ -267,7 +259,7 @@ function ui.update(dt)
         while root do
             if styles[root].frame then
                 local b1 = pos + box
-                local b2 = root.pos + framed(root)
+                local b2 = root.pos + root.box
                 local b3 = b2 - pos
                 box:set(b1.x > b2.x and b3.x, b1.y > b2.y and b3.y)
                 frames[#frames + 1] = root
@@ -288,6 +280,7 @@ function ui.update(dt)
         local body = bodies[node]
         local style = styles[node]
         local dir = style.dir
+        local frame = bundle.dirs(style.frame)
         local e1, e2 = bundle.dirs(style.edge)
         local p1, p2 = bundle.dirs(style.pad)
         local pos = nv()
@@ -314,7 +307,7 @@ function ui.update(dt)
             box[opp] = max(box[opp], sub[opp])
         end, 1)
         node.pos = pos
-        node.box = box + e1 + e2 + p1 + p2
+        node.box = (frame.zero and box or box:hadamard(frame)) + e1 + e2 + p1 + p2
     end, -huge)
     iter(ui, function(node)
         local style = styles[node]
@@ -334,14 +327,14 @@ function ui.update(dt)
         end
         if pin then
             local shift = nv(pin.arg and box / 2)
-            local edge = cropped - box - m2
+            local bound = cropped - box - m2
             pos:set(bundle.dirs(pin):hadamard(cropped) - shift)
-            pos:set(min(max(pos.x, m1.x), edge.x), min(max(pos.y, m1.y), edge.y))
+            pos:set(min(max(pos.x, m1.x), bound.x), min(max(pos.y, m1.y), bound.y))
             pos:set(pos + e1)
         end
         pos:set(root.pos + pos + bundle.dirs(style.shift))
         if node.hovered then
-            if tags[node] or node.class then nm.space("ui") end
+            if tags[node] or style.bg then nm.space("ui") end
             nm.queue(function()
                 local call = ui[node.click]
                 if call and node.focused and nm.m1.released then call(node) end
@@ -364,25 +357,26 @@ function ui.draw()
         local style = styles[node]
         local bg = style.bg
         local edge = style.edge
-        local pos = node.pos
-        local box = framed(node)
+        local pos = node.pos:floor()
+        local box = node.box
         local frames = node.frames
-        lg.setScissor()
-        if #frames > 0 then
-            for i = #frames, 1, -1 do
-                local frame = frames[i]
-                local e1, e2 = bundle.dirs(styles[frame].edge)
-                lg.intersectScissor(unpack(bounds[encode(frame.pos + e1, framed(frame) - e1 - e2)]))
-            end
+        for i = #frames, 1, -1 do
+            local frame = frames[i]
+            local e1, e2 = bundle.dirs(styles[frame].edge)
+            lg.intersectScissor(unpack(bounds[encode(frame.pos + e1, frame.box - e1 - e2)]))
         end
         if style.frame then lg.intersectScissor(unpack(bounds[encode(pos, box)])) end
-        pos = pos:floor()
         if edge then
-            local e1, e2 = bundle.dirs(edge)
+            -- lg.rectangle limited to uniform edge length
+            local e1 = bundle.dirs(edge)
+            local shift = (e1 / 2):floor()
+            pos = pos + shift
+            box = box - e1
+            lg.setLineWidth(e1:unpack())
             lg.setColor(edge.arg)
-            lg.rectangle("fill", pos.x, pos.y, box.x, box.y, bundle.dirs(style.r):unpack())
-            pos = pos + e1
-            box = box - e1 - e2
+            lg.rectangle("line", pos.x, pos.y, box.x, box.y, bundle.dirs(style.r):unpack())
+            pos = pos + shift
+            box = box - e1
         end
         if bg then
             lg.setColor(bg)
@@ -390,7 +384,8 @@ function ui.draw()
         end
         lg.setFont(nr[style.font])
         lg.setColor(style.color)
-        return tag and tag.draw(node, pos + bundle.dirs(style.pad))
+        if tag then tag.draw(node, pos + bundle.dirs(style.pad)) end
+        lg.setScissor()
     end)
 end
 

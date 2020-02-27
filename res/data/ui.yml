@@ -3,7 +3,7 @@ markup:
         <text click:body>%stats.fetch</text>
     </box>
     <box pin:c(0.5,1) class:c1>
-        <box pin:c(0,1) class:(c1,c2,c3)>
+        <box pin:(0,1) class:(c1,c2,c3)>
             <q id:i7/>
             <text class:c4>50/50</text>
         </box>
@@ -13,7 +13,7 @@ markup:
             <q id:i3/>
             <q id:i4/>
         </box>
-        <box pin:c(1,1) class:(c1,c2,c3)>
+        <box pin:(1,1) class:(c1,c2,c3)>
             <q id:i8/>
             <text class:c4>50/50</text>
         </box>
@@ -30,10 +30,9 @@ style:
     q:
         margin: 4
         hover:
-            color: 0x(ff0000)
+            bg: 0x(ff0000)
     c1:
         dir: x
-        shift: (0,4)
     c2:
         bg: 0x(6a6a6a)
         edge: 0x(484848)(4)
