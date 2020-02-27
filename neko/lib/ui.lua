@@ -26,18 +26,16 @@ local bundle = setmetatable({
     end
 }, {
     __index = function(t, k)
-        local body = tonumber(k) and k or match(k, "%((.+)%)")
+        local body = tonumber(k) or match(k, "%((.+)%)")
         local out = k
         if body then
-            out = nu.new("grow")
-            out.arg = match(k, "^[%x#]+")
-            if match(body, "%a") then
-                for token in gmatch(k, "[(,](%w+)") do
-                    out[#out + 1] = token
-                end
-            else
+            out = {
+                arg = match(k, "([%w#]+)%(")
+            }
+            if not match(body, "%a") then
                 local query = "[%d.-]+"
                 local max = 4
+                nu.new("grow", out)
                 while select(2, gsub(body, query, "")) < max do
                     body = gsub(body, body, "%1,%1")
                 end
@@ -46,6 +44,11 @@ local bundle = setmetatable({
                     body = gsub(body, query .. ",*", "", 1)
                 end
                 if #body > 0 then out[#out].y = 0 end
+                setmetatable(out, nil)
+            else
+                for token in gmatch(k, "[(,](%w+)") do
+                    out[#out + 1] = token
+                end
             end
         end
         t[k] = out
