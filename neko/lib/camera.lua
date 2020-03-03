@@ -14,6 +14,7 @@ local amp = 0
 local step = 0.04
 local grow = 2
 local decay = 0.99
+local epsilon = 0.1
 local target
 
 local function check(vec)
@@ -21,7 +22,8 @@ local function check(vec)
 end
 
 local function delta(e)
-    return nv(ne.pos[e]) - (camera.pos + (nd.box / 2):floor())
+    local ds = nv(ne.pos[e]) - camera.pos - (nd.box / 2):floor()
+    return nv(ds:len() > epsilon and ds)
 end
 
 function camera.focus(e)
@@ -44,7 +46,7 @@ end
 
 function camera.update(dt)
     local pos = camera.pos
-    if amp > 0 then camera.shift:set(amp * nv(exp(-t) * cos(2 * pi * t))) end
+    camera.shift:set(amp > epsilon and amp * nv(exp(-t) * cos(2 * pi * t)))
     pos:set(pos + delta(target) * v * dt)
     t = t + step
     amp = amp * decay

@@ -33,19 +33,22 @@ local qs = {
     "atlas:i7:90:2:11:13",
     "atlas:i8:103:2:11:13"
 }
+local shift = 1
 
 local q = nu.memoize(function(hash)
     local params = {}
     local to
     for str in gmatch(hash .. ":w:h", "[^:]+") do
-        local tex = res[str]
+        local arg = tonumber(str) or str
+        local tex = res[arg]
         if tex then
             to = {
                 w = tex:getWidth(),
                 h = tex:getHeight()
             }
+        else
+            params[#params + 1] = to[arg] or arg + (#params < 2 and -shift or 2 * shift)
         end
-        params[#params + 1] = to[str] or tonumber(str)
     end
     return lg.newQuad(unpack(params))
 end)
@@ -63,7 +66,8 @@ for i = 1, #qs do
     res[match(hash, query)] = {
         q = q[gsub(hash, query, "", 1)],
         tex = res[match(hash, "%w+")],
-        size = nv(match(hash, "(%d+):(%d+)$"))
+        size = nv(match(hash, "(%d+):(%d+)$")),
+        shift = nv(shift, shift)
     }
 end
 

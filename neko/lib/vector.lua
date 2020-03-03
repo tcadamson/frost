@@ -67,9 +67,9 @@ function vec:rot(add)
     return vec(cos(theta) * len, sin(theta) * len)
 end
 
-function vec:set(x, y)
-    x = x or self.x
-    y = y or self.y
+function vec:set(x, y, preserve)
+    x = x or (preserve and self.x or 0)
+    y = y or (preserve and self.y or 0)
     if type(x) == "cdata" then
         -- using unpack would limit us to vectors only
         local temp = x

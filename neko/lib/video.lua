@@ -3,16 +3,19 @@ local nu = neko.util
 local nc = neko.config
 local nv = neko.vector
 local video = {
-    box = nv()
+    box = nv(),
+    shift = nv()
 }
 local canvas
 
 function video.resize(w, h)
-    local box = nv(w, h) / nc.video.scale
-    nc.video.w = w
-    nc.video.h = h
-    canvas = lg.newCanvas(w, h)
-    video.box:set(box)
+    local box = video.box
+    local shift = video.shift
+    shift:set(w % 2, h % 2)
+    box:set((nv(w, h) + shift) / nc.video.scale)
+    nc.video.w = box.x
+    nc.video.h = box.y
+    canvas = lg.newCanvas(box:unpack())
     -- ui depends on mouse which depends on video
     -- if we require ui at the file level, we get a fatal loop
     neko.ui.box:set(box)

@@ -112,7 +112,7 @@ local tags = setmetatable({
         end,
         draw = function(node, pos)
             local data = nr[node.id]
-            lg.draw(data.tex, data.q, pos:unpack())
+            lg.draw(data.tex, data.q, pos.x, pos.y, 0, 1, 1, data.shift:unpack())
         end
     }
 }, {
@@ -264,7 +264,7 @@ function ui.update(dt)
                 local b1 = pos + box
                 local b2 = root.pos + root.box
                 local b3 = b2 - pos
-                box:set(b1.x > b2.x and b3.x, b1.y > b2.y and b3.y)
+                box:set(b1.x > b2.x and b3.x, b1.y > b2.y and b3.y, true)
                 frames[#frames + 1] = root
             end
             root = root.root
@@ -310,7 +310,7 @@ function ui.update(dt)
             box[opp] = max(box[opp], sub[opp])
         end, 1)
         node.pos = pos
-        node.box = (frame.zero and box or box:hadamard(frame)) + e1 + e2 + p1 + p2
+        node.box = (frame.zero and box or box:hadamard(frame):floor()) + e1 + e2 + p1 + p2
     end, -huge)
     iter(ui, function(node)
         local style = styles[node]
@@ -326,12 +326,12 @@ function ui.update(dt)
         if not align.zero then
             local p1, p2 = bundle.dirs(inherit.pad)
             local opp = opps[inherit.dir]
-            pos[opp] = (pos + (cropped - box - m1 - m2 - p1 - p2):hadamard(align))[opp]
+            pos[opp] = (pos + (cropped - box - m1 - m2 - p1 - p2):hadamard(align):floor())[opp]
         end
         if pin then
             local shift = nv(pin.arg and box / 2)
             local bound = cropped - box - m2
-            pos:set(bundle.dirs(pin):hadamard(cropped) - shift)
+            pos:set((bundle.dirs(pin):hadamard(cropped) - shift):floor())
             pos:set(min(max(pos.x, m1.x), bound.x), min(max(pos.y, m1.y), bound.y))
             pos:set(pos + e1)
         end
@@ -360,7 +360,7 @@ function ui.draw()
         local style = styles[node]
         local bg = style.bg
         local edge = style.edge
-        local pos = node.pos:floor()
+        local pos = node.pos
         local box = node.box
         local frames = node.frames
         for i = #frames, 1, -1 do
@@ -369,10 +369,11 @@ function ui.draw()
             lg.intersectScissor(unpack(bounds[encode(frame.pos + e1, frame.box - e1 - e2)]))
         end
         if style.frame then lg.intersectScissor(unpack(bounds[encode(pos, box)])) end
+        pos = pos:floor()
         if edge then
             -- lg.rectangle limited to uniform edge length
             local e1 = bundle.dirs(edge)
-            local shift = (e1 / 2):floor()
+            local shift = e1 / 2
             pos = pos + shift
             box = box - e1
             lg.setLineWidth(e1:unpack())

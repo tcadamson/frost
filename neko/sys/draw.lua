@@ -12,7 +12,7 @@ local draw = {
 function draw.update(e, dt)
     local pos = draw.pos
     local data = nr[ffi.string(draw.tex.id)]
-    local shift = (data.size / 2):floor()
+    local shift = data.shift + (data.size / 2):floor()
     if not nc.culled(pos, shift) then
         nx.queue(floor(pos.y), lg.draw, data.tex, data.q, pos.x, pos.y, 0, 1, 1, shift:unpack())
     end

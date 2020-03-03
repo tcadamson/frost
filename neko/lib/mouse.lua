@@ -23,7 +23,7 @@ function mouse.init()
     local data = nr.i5
     local canvas = lg.newCanvas((data.size * nc.video.scale):unpack())
     canvas:renderTo(function()
-        lg.draw(data.tex, data.q, 0, 0, 0, nc.video.scale, nc.video.scale)
+        lg.draw(data.tex, data.q, 0, 0, 0, nc.video.scale, nc.video.scale, data.shift:unpack())
     end)
     lm.setCursor(lm.newCursor(canvas:newImageData()))
 end
