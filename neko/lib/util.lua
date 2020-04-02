@@ -13,6 +13,20 @@ local meta = {
         end
     }
 }
+local escape = {
+    "^",
+    "$",
+    "(",
+    ")",
+    "[",
+    "]",
+    "%",
+    ".",
+    "*",
+    "+",
+    "-",
+    "?"
+}
 
 function util.out(t)
     for k, v in pairs(t) do
@@ -80,6 +94,13 @@ function util.poll(down, t)
     t.pressed = not t.down and down
     t.released = not down and t.down
     t.down = down
+end
+
+function util.escape(str)
+    for i = 1, #escape do
+        str = gsub(str, "%" .. escape[i], "%%%1")
+    end
+    return str
 end
 
 return util

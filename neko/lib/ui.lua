@@ -18,41 +18,53 @@ local nv = neko.vector
 local nm = neko.mouse
 local nu = neko.util
 local nr = neko.res
-local queue = {}
+local nl = neko.lerp
+local q1 = {}
+local q2 = {}
 local bundle = setmetatable({
     dirs = function(k)
         -- directions start clockwise from left side
         return nv(k and k[1]), nv(k and k[2])
+    end,
+    eval = function(t, k)
+        local last = t.dirs(k):unpack()
+        local mixed
+        if k then
+            for i = 1, #k do
+                nu.iter(k[i], function(t, k, v)
+                    mixed = mixed or v ~= last
+                end)
+            end
+        end
+        return mixed and 0 or last
     end
 }, {
     __index = function(t, k)
         local body = tonumber(k) or match(k, "%((.+)%)")
-        local out = k
+        local v = k
         if body then
-            out = {
-                arg = match(k, "([%w#]+)%(")
-            }
+            v = {arg = match(k, "([%w#]+)%(")}
             if not match(body, "%a") then
                 local query = "[%d.-]+"
                 local max = 4
-                nu.new("grow", out)
+                nu.new("grow", v)
                 while select(2, gsub(body, query, "")) < max do
-                    body = gsub(body, body, "%1,%1")
+                    body = gsub(body, nu.escape(body), "%1,%1")
                 end
                 for i = 1, max do
-                    out[ceil(i / 2)][i % 2 == 1 and "x" or "y"] = tonumber(match(body, query))
+                    v[ceil(i / 2)][i % 2 == 1 and "x" or "y"] = tonumber(match(body, query))
                     body = gsub(body, query .. ",*", "", 1)
                 end
-                if #body > 0 then out[#out].y = 0 end
-                setmetatable(out, nil)
+                if #body > 0 then v[#v].y = 0 end
+                setmetatable(v, nil)
             else
-                for token in gmatch(k, "[(,](%w+)") do
-                    out[#out + 1] = token
+                for str in gmatch(k, "[(,](%w+)") do
+                    v[#v + 1] = str
                 end
             end
         end
-        t[k] = out
-        return out
+        t[k] = v
+        return v
     end
 })
 local styles = setmetatable({
@@ -62,6 +74,7 @@ local styles = setmetatable({
     __index = function(styles, node)
         local id = node.class
         local class = rawget(styles, id)
+        local tag = rawget(styles, node.tag)
         if not class and type(id) == "table" then
             class = nu.merge({}, rawget(styles, id[#id]))
             for i = #id - 1, 1, -1 do
@@ -76,16 +89,46 @@ local styles = setmetatable({
                     })
                 end
             end
+            styles[id] = class
         end
-        local tag = rawget(styles, node.tag)
-        local out = setmetatable({}, {
+        styles[node] = setmetatable({}, {
             __index = function(t, k)
-                id = node.hovered and (node.focused and nm.m1.down and "click" or "hover")
-                return class and class[id][k] or tag and tag[id][k] or rawget(styles, k)
+                local state = node.hovered and (nm.m1.down and node.focused and "click" or "hover")
+                local v = class and class[state][k] or tag and tag[state][k] or rawget(styles, k)
+                if type(v) == "table" then
+                    local buf = node.buf
+                    local last = buf[k]
+                    local to = v.to or v
+                    if not buf[v] then buf[v] = nu.merge({}, v) end
+                    v = buf[v]
+                    for i = 1, #q1 do
+                        if q1[i] == node then state = 0 end
+                    end
+                    for i = 1, #q2 do
+                        if q2[i] == node then state = not state and 1 end
+                    end
+                    if state or not last then
+                        local len = bundle:eval(v.len)
+                        local delay = bundle:eval(v.delay)
+                        if state and state > 0 then
+                            len = bundle:eval(last.len)
+                            delay = bundle:eval(last.delay)
+                        end
+                        if last then
+                            for i = 1, #v do
+                                nu.merge(v[i], last[i])
+                            end
+                        end
+                        for i = 1, #v do
+                            nl.to(v[i], len, to[i]):delay(delay)
+                        end
+                    end
+                    buf[k] = v
+                end
+                return v
             end
         })
-        styles[node] = out
-        return out
+        return styles[node]
     end
 })
 local bodies = setmetatable({}, {
@@ -153,10 +196,10 @@ local bounds = nu.memoize(function(hash)
     return out
 end)
 
-local function iter(level, call, steps)
+local function iter(root, call, steps)
     steps = steps or huge
-    for i = 1, #level do
-        local node = level[i]
+    for i = 1, #root do
+        local node = root[i]
         if node.status > 0 then
             if steps > 0 then
                 call(node)
@@ -175,7 +218,8 @@ local function node(tag, props, body)
         tag = tag,
         body = body,
         root = ui,
-        frames = {}
+        frames = {},
+        buf = {}
     }
     props = {
         pos = nv(),
@@ -239,7 +283,16 @@ function ui.style(id)
             end
         })
         nu.iter(out, function(t, k, v)
-            t[k] = bundle[gsub(v, "0x%((%x+)%)", "#%1")]
+            local to = match(v, "(.-):")
+            if to then
+                local lerp = {}
+                for k, v in gmatch(v, "(%a+)(%(.-%))") do
+                    lerp[k] = bundle[v]
+                end
+                t[k] = nu.merge(nu.merge({}, lerp.from or bundle[0]), lerp)
+            else
+                t[k] = bundle[gsub(v, "0x%((%x+)%)", "#%1")]
+            end
         end)
     end
 end
@@ -251,6 +304,9 @@ function ui.bind(fs)
 end
 
 function ui.update(dt)
+    for i = 1, #q1 do
+        q1[i] = nil
+    end
     iter(ui, function(node)
         local pos = node.pos
         local box = node.box
@@ -271,11 +327,11 @@ function ui.update(dt)
         end
         node.hovered = nm.pos > pos and nm.pos < pos + box
         if node.hovered then
-            for i = 1, node.root == ui and #queue or 0 do
-                local queued = queue[i]
+            for i = 1, node.root == ui and #q1 or 0 do
+                local queued = q1[i]
                 queued.hovered = queued == node
             end
-            queue[#queue + 1] = node
+            q1[#q1 + 1] = node
         end
     end)
     iter(ui, function(node)
@@ -289,12 +345,12 @@ function ui.update(dt)
         local pos = nv()
         local box = nv()
         if body then
-            for token in gmatch(body, "%%([^%s]+)") do
+            for str in gmatch(body, "%%([^%s]+)") do
                 local zone = neko
-                for sub in gmatch(token, "%w+") do
+                for sub in gmatch(str, "%w+") do
                     zone = zone[sub]
                 end
-                body = gsub(body, format("%%%%%s", token), type(zone) == "function" and zone() or zone)
+                body = gsub(body, format("%%%%%s", str), type(zone) == "function" and zone() or zone)
             end
             node.body = body
         end
@@ -344,12 +400,15 @@ function ui.update(dt)
             end)
         end
     end)
-    local top = queue[#queue]
+    local top = q1[#q1]
     focus = nm.m1.pressed and top or top == focus and focus
-    for i = 1, #queue do
-        local queued = queue[i]
+    for i = 1, #q2 do
+        q2[i] = nil
+    end
+    for i = 1, #q1 do
+        local queued = q1[i]
         queued.focused = queued == focus
-        queue[i] = nil
+        q2[i] = queued
     end
     nm.space()
 end
@@ -360,7 +419,7 @@ function ui.draw()
         local style = styles[node]
         local bg = style.bg
         local edge = style.edge
-        local pos = node.pos
+        local pos = node.pos:floor()
         local box = node.box
         local frames = node.frames
         for i = #frames, 1, -1 do
@@ -369,14 +428,13 @@ function ui.draw()
             lg.intersectScissor(unpack(bounds[encode(frame.pos + e1, frame.box - e1 - e2)]))
         end
         if style.frame then lg.intersectScissor(unpack(bounds[encode(pos, box)])) end
-        pos = pos:floor()
         if edge then
             -- lg.rectangle limited to uniform edge length
             local e1 = bundle.dirs(edge)
             local shift = e1 / 2
             pos = pos + shift
             box = box - e1
-            lg.setLineWidth(e1:unpack())
+            lg.setLineWidth(bundle:eval(edge))
             lg.setColor(edge.arg)
             lg.rectangle("line", pos.x, pos.y, box.x, box.y, bundle.dirs(style.r):unpack())
             pos = pos + shift
