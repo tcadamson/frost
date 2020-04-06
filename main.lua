@@ -15,8 +15,8 @@ function love.load()
     ns:switch("game")
     nu.load("ui")
     nu.bind({
-        body = function(node)
-            print(node.body)
+        stats = function(node)
+            print(nu[1].body)
         end
     })
     -- TODO: more sophisticated heuristic
@@ -31,8 +31,8 @@ function love.update(dt)
     ni.update(dt)
     nu.update(dt)
     nl.update(dt)
-    ne.update(dt)
     na.update(dt)
+    ne.update(dt)
 end
 
 function love.resize(w, h)

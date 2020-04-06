@@ -1,11 +1,9 @@
 markup:
-    <box>
-        <text click:body>%stats.fetch</text>
-    </box>
+    <box>%stats.fetch</box>
     <box pin:c(0.5,1) class:c1>
         <box pin:(0,1) class:(c1,c2,c3)>
             <q id:i7/>
-            <text class:c4>50/50</text>
+            <text class:c4 click:stats>50/50</text>
         </box>
         <box class:(c1,c2)>
             <q id:i1/>
@@ -15,27 +13,27 @@ markup:
         </box>
         <box pin:(1,1) class:(c1,c2,c3)>
             <q id:i8/>
-            <text class:c4>50/50</text>
+            <text class:c4 click:stats>50/50</text>
         </box>
     </box>
 style:
     text:
-        bg: 0x(6a6a6a)
+        bg: 0x(5c5867)
         pad: 5
         hover:
-            bg: 0x(ff0000)
+            bg: 0x(d8627d)
         click:
             bg: 0x(ffffff)
             color: 0x(000000)
     q:
         margin: 4
         hover:
-            bg: 0x(ff0000)
+            bg: 0x(d8627d)
     c1:
         dir: x
     c2:
-        bg: 0x(6a6a6a)
-        edge: 0x(484848)(5)
+        bg: 0x(5c5867)
+        edge: 0x(474250)(5)
         frame: to(1):from(0.1,1):len(0.4):delay(0.6)
         shift: to(0):from(0,60):len(0.4):delay(0.6)
         pad: (7,5)

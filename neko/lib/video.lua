@@ -13,9 +13,9 @@ function video.resize(w, h)
     local shift = video.shift
     shift:set(w % 2, h % 2)
     box:set((nv(w, h) + shift) / nc.video.scale)
-    nc.video.w = box.x
-    nc.video.h = box.y
     canvas = lg.newCanvas(box:unpack())
+    nc.video.w = w
+    nc.video.h = h
     -- ui depends on mouse which depends on video
     -- if we require ui at the file level, we get a fatal loop
     neko.ui.box:set(box)

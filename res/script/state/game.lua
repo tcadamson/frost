@@ -12,19 +12,9 @@ local game = {}
 local p1
 local m1
 
-local function field(x, y)
-    local r = 300
-    x = x or 0
-    y = y or 0
-    lg.setColor("#dfdfdf")
-    lg.polygon("fill", x - r, y, x, y - r, x + r, y, x, y + r)
-    lg.setColor()
-end
-
 local function draw()
     lg.push()
     lg.translate((na.shift - na.pos):unpack())
-    field()
     nx.draw()
     if ni.focus.down then
         local mob = nv(ne.pos[m1])
@@ -40,14 +30,18 @@ end
 
 function game:enter()
     p1 = ne.new("p1", {
-        pos = {
-            x = 0,
-            y = 200
-        },
+        pos = {},
         target = {status = 0}
     })
     m1 = ne.new("m1", {
         target = {uid = p1}
+    })
+    m2 = ne.new({
+        pos = {
+            x = 70,
+            y = -100
+        },
+        tex = {id = "i9"}
     })
     na.focus(p1)
 end

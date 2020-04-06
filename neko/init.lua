@@ -1,6 +1,5 @@
 local nu = neko.util
 local nc = neko.config
-local nv = neko.video
 local nm = neko.mouse
 local ne = neko.ecs
 local nr = neko.run
@@ -20,7 +19,6 @@ ni.init({
         "w"
     }
 })
-nv.resize(nc.video.w, nc.video.h)
 nr.rate = 1 / 144
 -- post-load operations
 local ns = neko.state.new()

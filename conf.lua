@@ -23,9 +23,9 @@ local identity = "frost"
 local path = "config.ini"
 local def = [[
     [video]
-    fps=144
+    fps=0
     fullscreen=0
-    vsync=0
+    vsync=1
     scale=2
     display=1
     w=1280
@@ -88,6 +88,20 @@ local function sync(...)
     return (swap or select("#", ...) == 1) and flags
 end
 
+function nc.init()
+    local lw = love.window
+    local lr = love.resize
+    local w, h, flags = lw.getMode()
+    flags = sync(w, h, flags)
+    if flags then lw.setMode(nc.video.w, nc.video.h, flags) end
+    neko.run.framerate = nc.video.fps > 0 and nc.video.fps
+    neko.video.resize(w, h)
+end
+
+function nc.save()
+    lf.write(path, clean(def, nc))
+end
+
 function love.conf(t)
     local window = sync(t.window)
     window.title = identity
@@ -95,26 +109,4 @@ function love.conf(t)
     -- lw.setMode not yet available
     window.width = window.w
     window.height = window.h
-    setmetatable(nc, {
-        __index = {
-            init = function()
-                local lw = love.window
-                local lr = love.resize
-                local flags = sync(lw.getMode())
-                if flags then
-                    lw.setMode(nc.video.w, nc.video.h, flags)
-                    -- lw.setMode doesn't trigger the resize call
-                    -- lr not available in fullscreen
-                    if lr then lr(lw.getMode()) end
-                end
-                neko.run.framerate = nc.video.fps > 0 and nc.video.fps
-            end,
-            save = function()
-                lf.write(path, tostring(nc))
-            end
-        },
-        __tostring = function(t)
-            return clean(def, t)
-        end
-    })
 end

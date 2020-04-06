@@ -27,16 +27,16 @@ local bundle = setmetatable({
         return nv(k and k[1]), nv(k and k[2])
     end,
     eval = function(t, k)
-        local last = t.dirs(k):unpack()
+        local old = t.dirs(k):unpack()
         local mixed
         if k then
             for i = 1, #k do
                 nu.iter(k[i], function(t, k, v)
-                    mixed = mixed or v ~= last
+                    mixed = mixed or v ~= old
                 end)
             end
         end
-        return mixed and 0 or last
+        return mixed and 0 or old
     end
 }, {
     __index = function(t, k)
@@ -97,26 +97,27 @@ local styles = setmetatable({
                 local v = class and class[state][k] or tag and tag[state][k] or rawget(styles, k)
                 if type(v) == "table" then
                     local buf = node.buf
-                    local last = buf[k]
+                    local old = buf[k]
                     local to = v.to or v
+                    local status
                     if not buf[v] then buf[v] = nu.merge({}, v) end
                     v = buf[v]
                     for i = 1, #q1 do
-                        if q1[i] == node then state = 0 end
+                        if q1[i] == node then status = 0 end
                     end
                     for i = 1, #q2 do
-                        if q2[i] == node then state = not state and 1 end
+                        if q2[i] == node then status = not status and 1 end
                     end
-                    if state or not last then
+                    if status or not old then
                         local len = bundle:eval(v.len)
                         local delay = bundle:eval(v.delay)
-                        if state and state > 0 then
-                            len = bundle:eval(last.len)
-                            delay = bundle:eval(last.delay)
+                        if status and status > 0 then
+                            len = bundle:eval(old.len)
+                            delay = bundle:eval(old.delay)
                         end
-                        if last then
+                        if old then
                             for i = 1, #v do
-                                nu.merge(v[i], last[i])
+                                nu.merge(v[i], old[i])
                             end
                         end
                         for i = 1, #v do
